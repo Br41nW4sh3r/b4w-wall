@@ -3,43 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crear - B4W</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<title>Pintar - B4W</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
   header{padding:24px 20px;display:flex;justify-content:space-between;align-items:center;max-width:700px;margin:0 auto}
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:32px}
-  .logo span{color:#ff2d55}
-  .back{color:#fff;opacity:0.7;text-decoration:none;font-size:14px}
-  .box{max-width:700px;margin:20px auto;padding:0 20px}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:32px} .logo span{color:#ff2d55}
+  .back{color:#fff;opacity:0.7;text-decoration:none}
+  .box{max-width:700px;margin:0 auto;padding:0 20px}
   h1{font-family:'Bebas Neue',sans-serif;font-size:48px;margin-bottom:20px}
   label{display:block;font-size:13px;font-weight:600;margin:16px 0 6px;opacity:0.8}
-  input,textarea{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px;border-radius:12px;font-family:inherit;font-size:15px}
-  textarea{height:90px;resize:vertical}
-  input[type="file"]{padding:12px}
+  input,select{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px;border-radius:12px;font-size:15px}
+  #preview{width:100%;height:280px;border-radius:16px;margin-top:20px;background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80');background-size:cover;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
+  #preview span{font-family:'Permanent Marker',cursive;font-size:42px;color:#000;word-break:break-word}
   button{width:100%;background:#ff2d55;color:#fff;border:none;padding:16px;border-radius:999px;font-weight:800;font-size:16px;margin-top:24px;cursor:pointer}
-  button:disabled{opacity:0.5}
-  #msg{text-align:center;margin-top:14px;font-size:14px;min-height:20px}
-  #preview{width:100%;max-height:300px;object-fit:cover;border-radius:12px;display:none;margin-top:12px}
+  #msg{text-align:center;margin-top:14px}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">B4W<span>.</span></div>
-  <a class="back" href="index.html">← Volver</a>
-</header>
+<header><div class="logo">[B4W] <span>WALL</span></div><a class="back" href="index.html">← Volver</a></header>
 <div class="box">
-  <h1>CREÁ TU GRAFFITI</h1>
-  <label>Título *</label>
-  <input id="title" maxlength="80" placeholder="Ej: Hormigon">
-  <label>Autor / Apodo</label>
-  <input id="author" maxlength="40" placeholder="Ej: B4W">
-  <label>Descripción</label>
-  <textarea id="desc" maxlength="500" placeholder="Contanos algo..."></textarea>
-  <label>Foto *</label>
-  <input id="file" type="file" accept="image/*">
-  <img id="preview" alt="">
+  <h1>PINTAR EL MÍO</h1>
+  <label>Tu texto *</label>
+  <input id="texto" maxlength="60" placeholder="Ej: VAMO LOS REDO!!!">
+  <label>Tu nombre</label>
+  <input id="author" maxlength="40" placeholder="Ej: marcelo">
+  <label>Estilo</label>
+  <select id="estilo"><option value="tag">tag</option><option value="bomb">bomb</option><option value="wildstyle">wildstyle</option></select>
+  <label>Color del texto</label>
+  <input id="color1" type="color" value="#000000">
+  <div id="preview"><span id="previewText">VAMO LOS REDO!!!</span></div>
   <button id="btn">PUBLICAR EN LA PARED →</button>
   <div id="msg"></div>
 </div>
@@ -47,39 +41,25 @@
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const fileInput = document.getElementById('file');
-const preview = document.getElementById('preview');
-fileInput.addEventListener('change', ()=>{
-  const f = fileInput.files[0];
-  if(f){ preview.src = URL.createObjectURL(f); preview.style.display='block'; }
-});
+const textoEl=document.getElementById('texto');
+const colorEl=document.getElementById('color1');
+const prev=document.getElementById('previewText');
+textoEl.addEventListener('input',()=>{ prev.textContent=textoEl.value||'VAMO LOS REDO!!!'; });
+colorEl.addEventListener('input',()=>{ prev.style.color=colorEl.value; });
 document.getElementById('btn').addEventListener('click', async ()=>{
-  const btn = document.getElementById('btn');
-  const msg = document.getElementById('msg');
-  const title = document.getElementById('title').value.trim();
-  const author = document.getElementById('author').value.trim() || 'Anónimo';
-  const desc = document.getElementById('desc').value.trim();
-  const file = fileInput.files[0];
-  if(!title){ msg.textContent='Poné un título.'; return; }
-  if(!file){ msg.textContent='Elegí una foto.'; return; }
-  if(file.size > 5*1024*1024){ msg.textContent='La foto es muy pesada (máx 5MB).'; return; }
-  const last = localStorage.getItem('b4w_last');
-  if(last && Date.now() - Number(last) < 30000){ msg.textContent='Esperá 30 segundos entre publicaciones.'; return; }
-  btn.disabled=true; msg.textContent='Subiendo...';
-  try{
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4) || 'jpg';
-    const fileName = Date.now() + '-' + Math.random().toString(36).slice(2,8) + '.' + ext;
-    const { error: upError } = await supabaseClient.storage.from('graffitis').upload(fileName, file);
-    if(upError) throw upError;
-    const { data: pub } = supabaseClient.storage.from('graffitis').getPublicUrl(fileName);
-    // Guardamos en AMBAS columnas para que ande con tu tabla vieja y la nueva
-    const { error: dbError } = await supabaseClient.from('graffitis').insert([{ title, texto: title, author, description: desc, image_url: pub.publicUrl, estilo: 'foto' }]);
-    if(dbError) throw dbError;
-    localStorage.setItem('b4w_last', String(Date.now()));
-    msg.textContent='¡Publicado! Redirigiendo...';
-    setTimeout(()=> window.location.href='index.html', 1000);
-  }catch(e){ console.error(e); msg.textContent='Error: ' + (e.message || 'intentá de nuevo'); btn.disabled=false; }
+  const msg=document.getElementById('msg');
+  const texto=textoEl.value.trim();
+  const author=document.getElementById('author').value.trim()||'marcelo';
+  const estilo=document.getElementById('estilo').value;
+  const color1=colorEl.value;
+  if(!texto){ msg.textContent='Escribí tu texto.'; return; }
+  msg.textContent='Publicando...';
+  const { error } = await supabaseClient.from('graffitis').insert([{ texto, author, estilo, color1 }]);
+  if(error){ msg.textContent='Error: '+error.message; return; }
+  msg.textContent='¡Publicado!';
+  setTimeout(()=> window.location.href='index.html',800);
 });
 </script>
 </body>
