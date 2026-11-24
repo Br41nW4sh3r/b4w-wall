@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear Graffiti - B4W WALL</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
+</head>
+<body>
+<header><a href="index.html">← Volver a la pared</a><h1>CREÁ TU GRAFFITI</h1></header>
+
+<main class="editor">
+  <canvas id="canvas" width="1080" height="1080"></canvas>
+
+  <div class="controles">
+    <input id="texto" type="text" maxlength="20" placeholder="Escribí tu graffiti... ej: B4W" value="B4W">
+    <input id="alias" type="text" maxlength="20" placeholder="Tu alias... ej: Marcelo">
+
+    <label>Estilo</label>
+    <select id="estilo">
+      <option value="stencil">Stencil - Callejero</option>
+      <option value="bubble">Bubble - Letras gordas</option>
+      <option value="wildstyle">Wildstyle - Hip Hop</option>
+      <option value="neon">Neón - Cartel</option>
+      <option value="tag">Tag - Firma</option>
+    </select>
+
+    <label>Color principal</label>
+    <input id="color1" type="color" value="#ff2d55">
+    <label>Color secundario</label>
+    <input id="color2" type="color" value="#ffd60a">
+
+    <label>Fondo</label>
+    <select id="fondo">
+      <option value="ladrillo">Pared de ladrillo</option>
+      <option value="hormigon">Hormigón</option>
+      <option value="negro">Negro / Noche</option>
+      <option value="chapa">Chapa</option>
+    </select>
+
+    <button id="btnPintar" class="btn-principal">PINTAR EN LA PARED</button>
+    <button id="btnDescargar">Descargar para Historia (9:16)</button>
+
+    <div id="compartir" style="display:none">
+      <h3>¡Listo! Compartilo:</h3>
+      <a id="linkWhatsapp" target="_blank">WhatsApp</a>
+      <a id="linkX" target="_blank">X</a>
+      <a id="linkFacebook" target="_blank">Facebook</a>
+      <p>Para Instagram: descargá la imagen y subila como historia.</p>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>

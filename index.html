@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B4W WALL - La Pared</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+  <h1>[B4W] <span>WALL</span></h1>
+  <p>La pared es de todos. Pintá algo, que quede en la historia.</p>
+  <a href="crear.html" class="btn-principal">+ PINTAR MI GRAFFITI</a>
+</header>
+
+<div class="filtros">
+  <button onclick="filtrar('todos')">Todos</button>
+  <button onclick="filtrar('stencil')">Stencil</button>
+  <button onclick="filtrar('bubble')">Bubble</button>
+  <button onclick="filtrar('wildstyle')">Wildstyle</button>
+  <button onclick="filtrar('neon')">Neón</button>
+  <button onclick="filtrar('tag')">Tag</button>
+</div>
+
+<main id="muro" class="muro"></main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>
