@@ -3,64 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pintar - B4W</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+<title>Pintar - [B4W] WALL</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
-  header{padding:24px 20px;display:flex;justify-content:space-between;align-items:center;max-width:700px;margin:0 auto}
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:32px} .logo span{color:#ff2d55}
-  .back{color:#fff;opacity:0.7;text-decoration:none}
-  .box{max-width:700px;margin:0 auto;padding:0 20px}
-  h1{font-family:'Bebas Neue',sans-serif;font-size:48px;margin-bottom:20px}
-  label{display:block;font-size:13px;font-weight:600;margin:16px 0 6px;opacity:0.8}
-  input,select{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px;border-radius:12px;font-size:15px}
-  #preview{width:100%;height:280px;border-radius:16px;margin-top:20px;background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80');background-size:cover;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
-  #preview span{font-family:'Permanent Marker',cursive;font-size:42px;color:#000;word-break:break-word}
-  button{width:100%;background:#ff2d55;color:#fff;border:none;padding:16px;border-radius:999px;font-weight:800;font-size:16px;margin-top:24px;cursor:pointer}
-  #msg{text-align:center;margin-top:14px}
+  .crear-wrap{max-width:600px;margin:0 auto;padding:20px}
+  .crear-wrap label{display:block;margin:15px 0 5px;font-weight:bold}
+  .crear-wrap input,.crear-wrap select{width:100%;padding:12px;border-radius:10px;border:1px solid #444;background:#222;color:#fff;font-size:16px;box-sizing:border-box}
+  .colores{display:flex;gap:10px}
+  .colores input{height:50px;padding:5px;cursor:pointer}
+  #preview{width:100%;max-width:600px;border-radius:16px;margin-top:20px;display:block}
+  #btnPublicar{width:100%;padding:16px;margin-top:20px;background:#ff2a4d;color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer}
 </style>
 </head>
 <body>
-<header><div class="logo">[B4W] <span>WALL</span></div><a class="back" href="index.html">← Volver</a></header>
-<div class="box">
-  <h1>PINTAR EL MÍO</h1>
-  <label>Tu texto *</label>
-  <input id="texto" maxlength="60" placeholder="Ej: VAMO LOS REDO!!!">
-  <label>Tu nombre</label>
-  <input id="author" maxlength="40" placeholder="Ej: marcelo">
+<header><a href="index.html">← Volver a la pared</a><h1>[B4W] <span>WALL</span></h1></header>
+<main class="crear-wrap">
+  <h2>Pintá tu graffiti</h2>
+  <label>Tu texto</label>
+  <input id="texto" placeholder="Ej: VAMO LOS REDO!!!" maxlength="30" value="VAMO LOS REDO!!!">
   <label>Estilo</label>
-  <select id="estilo"><option value="tag">tag</option><option value="bomb">bomb</option><option value="wildstyle">wildstyle</option></select>
-  <label>Color del texto</label>
-  <input id="color1" type="color" value="#000000">
-  <div id="preview"><span id="previewText">VAMO LOS REDO!!!</span></div>
-  <button id="btn">PUBLICAR EN LA PARED →</button>
-  <div id="msg"></div>
-</div>
+  <select id="estilo">
+    <option value="stencil">Stencil</option>
+    <option value="bubble">Bubble</option>
+    <option value="wildstyle">Wildstyle</option>
+    <option value="neon" selected>Neón</option>
+    <option value="tag">Tag</option>
+  </select>
+  <label>Fondo - tus paredes</label>
+  <select id="fondo">
+    <option value="ladrillo" selected>Ladrillo rojo</option>
+    <option value="hormigon">Hormigón</option>
+    <option value="negro">Negro</option>
+    <option value="chapa">Chapa</option>
+  </select>
+  <label>Colores</label>
+  <div class="colores"><input type="color" id="color1" value="#ff2a4d"><input type="color" id="color2" value="#ffffff"></div>
+  <label>Tu alias</label>
+  <input id="alias" placeholder="Ej: marcelo" value="marcelo">
+  <canvas id="preview" width="1080" height="1080"></canvas>
+  <button id="btnPublicar">PINTAR Y PUBLICAR</button>
+  <p id="msg" style="text-align:center"></p>
+</main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
+const canvas = document.getElementById('preview');
+const ctx = canvas.getContext('2d');
+const FUENTES = { stencil:"'Black Ops One', sans-serif", bubble:"'Titan One', sans-serif", wildstyle:"'Black Ops One', sans-serif", neon:"'Monoton', sans-serif", tag:"'Permanent Marker', cursive" };
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const textoEl=document.getElementById('texto');
-const colorEl=document.getElementById('color1');
-const prev=document.getElementById('previewText');
-textoEl.addEventListener('input',()=>{ prev.textContent=textoEl.value||'VAMO LOS REDO!!!'; });
-colorEl.addEventListener('input',()=>{ prev.style.color=colorEl.value; });
-document.getElementById('btn').addEventListener('click', async ()=>{
-  const msg=document.getElementById('msg');
-  const texto=textoEl.value.trim();
-  const author=document.getElementById('author').value.trim()||'marcelo';
-  const estilo=document.getElementById('estilo').value;
-  const color1=colorEl.value;
-  if(!texto){ msg.textContent='Escribí tu texto.'; return; }
-  msg.textContent='Publicando...';
-  const { error } = await supabaseClient.from('graffitis').insert([{ texto, author, estilo, color1 }]);
-  if(error){ msg.textContent='Error: '+error.message; return; }
-  msg.textContent='¡Publicado!';
-  setTimeout(()=> window.location.href='index.html',800);
+// TUS FOTOS - tienen que estar en la misma carpeta
+const FONDOS = {
+  ladrillo: { src:'ladrillo.jpg', cropTop:0, cropH:0.72 }, // recorta pasto y piedra de abajo, solo ladrillo
+  hormigon: { src:'hormigon.jpg', cropTop:0, cropH:0.88 }, // recorta pisito de abajo
+  negro: { src:'negro.jpg', cropTop:0, cropH:1 },
+  chapa: { src:'chapa.jpg', cropTop:0, cropH:1 }
+};
+
+function dibujar() {
+  const texto = document.getElementById('texto').value || 'B4W';
+  const estilo = document.getElementById('estilo').value;
+  const fondo = document.getElementById('fondo').value;
+  const color1 = document.getElementById('color1').value;
+  const color2 = document.getElementById('color2').value;
+  function dibujarTexto() {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    let lineas = [texto]; let size = 130;
+    if (texto.length > 12) { size = 95; lineas = [texto.slice(0, Math.ceil(texto.length/2)), texto.slice(Math.ceil(texto.length/2))]; }
+    if (texto.length > 20) size = 75;
+    ctx.font = `${size}px ${FUENTES[estilo]}`;
+    ctx.globalAlpha = 0.94;
+    const centroY = 540;
+    lineas.forEach((linea, i) => {
+      const y = lineas.length === 1 ? centroY : centroY - 70 + i * 140;
+      if (estilo === 'neon') {
+        ctx.shadowColor = color1; ctx.shadowBlur = 35; ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
+        ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.fillText(linea, 540, y); ctx.shadowBlur = 0;
+      } else if (estilo === 'bubble') {
+        ctx.lineWidth = 10; ctx.strokeStyle = color2; ctx.strokeText(linea, 540, y);
+        ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
+      } else if (estilo === 'tag') {
+        ctx.save(); ctx.translate(540, y); ctx.rotate(-0.06); ctx.fillStyle = color1; ctx.fillText(linea, 0, 0); ctx.restore();
+      } else {
+        ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(linea, 540, y);
+        ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+  const cfg = FONDOS[fondo];
+  const img = new Image(); img.src = cfg.src;
+  img.onload = () => {
+    const sw = img.width, sh = img.height * cfg.cropH, sy = img.height * cfg.cropTop;
+    ctx.drawImage(img, 0, sy, sw, sh, 0, 0, 1080, 1080);
+    dibujarTexto();
+  };
+  img.onerror = () => { ctx.fillStyle = '#333'; ctx.fillRect(0,0,1080,1080); ctx.fillStyle='#fff'; ctx.font='30px sans-serif'; ctx.textAlign='center'; ctx.fillText('Falta el archivo '+cfg.src, 540, 540); };
+}
+['texto','estilo','fondo','color1','color2'].forEach(id => {
+  document.getElementById(id).addEventListener('input', dibujar);
+  document.getElementById(id).addEventListener('change', dibujar);
 });
+document.fonts.ready.then(() => dibujar()); dibujar();
+document.getElementById('btnPublicar').onclick = async () => {
+  const btn = document.getElementById('btnPublicar');
+  const texto = document.getElementById('texto').value.trim();
+  if (!texto) { alert('Escribí algo'); return; }
+  btn.disabled = true; btn.textContent = 'Pintando...';
+  try {
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data, error } = await client.from('graffitis').insert([{
+      texto, estilo: document.getElementById('estilo').value,
+      fondo: document.getElementById('fondo').value,
+      color1: document.getElementById('color1').value,
+      color2: document.getElementById('color2').value,
+      autor_alias: document.getElementById('alias').value.trim() || 'Anónimo'
+    }]).select().single();
+    if (error) throw error;
+    window.location.href = `graffiti.html?id=${data.id}`;
+  } catch(e) { document.getElementById('msg').textContent = 'Error: ' + e.message; btn.disabled = false; btn.textContent = 'PINTAR Y PUBLICAR'; }
+};
 </script>
 </body>
 </html>
