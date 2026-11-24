@@ -3,118 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graffiti en B4W WALL</title>
-
-<!-- Esto es lo que ve WhatsApp / X / Facebook cuando pegás el link -->
+<title>Graffiti - B4W WALL</title>
 <meta property="og:title" content="[B4W] WALL - La Pared es de todos">
-<meta property="og:description" content="Mirá este graffiti pintado en B4W WALL. Entrá y pintá el tuyo.">
+<meta property="og:description" content="Mirá este graffiti pintado en B4W WALL">
 <meta property="og:image" content="https://b4w-wall.vercel.app/og-wall.jpg">
-<meta property="og:url" content="https://b4w-wall.vercel.app/">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
 <style>
-  .graffiti-detalle { max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
-  .graffiti-cuadro { border-radius: 16px; padding: 40px 20px; min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-  .graffiti-texto { font-size: 64px; line-height: 1; word-break: break-word; }
-  .share-box { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
-  .share-box a, .share-box button { background: #222; color: #fff; padding: 12px 18px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer; }
-  .share-box a.whatsapp { background: #25D366; color: #000; font-weight: bold; }
+  .graffiti-detalle{max-width:600px;margin:0 auto;padding:20px;text-align:center}
+  .graffiti-cuadro{border-radius:16px;padding:40px 20px;min-height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+  .graffiti-texto{font-size:64px;line-height:1;word-break:break-word}
+  .share-box{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+  .share-box a,.share-box button{background:#222;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;border:none;cursor:pointer}
+  .share-box a.whatsapp{background:#25D366;color:#000;font-weight:bold}
+  #debug{background:#111;color:#0f0;padding:10px;border-radius:8px;text-align:left;font-size:12px;white-space:pre-wrap;margin-top:20px}
 </style>
 </head>
 <body>
-<header>
-  <a href="index.html">← Volver a la pared</a>
-  <h1>[B4W] <span>WALL</span></h1>
-</header>
-
+<header><a href="index.html">← Volver a la pared</a><h1>[B4W] <span>WALL</span></h1></header>
 <main class="graffiti-detalle">
   <div id="loading">Cargando graffiti...</div>
-
   <div id="contenido" style="display:none">
-    <div id="cuadro" class="graffiti-cuadro">
-      <div id="textoGraffiti" class="graffiti-texto"></div>
-      <div id="estiloGraffiti" style="margin-top:15px; font-size:14px; opacity:0.8"></div>
-    </div>
-    <h2 id="autor"></h2>
-    <p id="fecha"></p>
-
+    <div id="cuadro" class="graffiti-cuadro"><div id="textoGraffiti" class="graffiti-texto"></div><div id="estiloGraffiti" style="margin-top:15px"></div></div>
+    <h2 id="autor"></h2><p id="fecha"></p>
     <div class="share-box">
       <a id="btnWA" class="whatsapp" target="_blank">WhatsApp</a>
       <a id="btnX" target="_blank">X</a>
       <a id="btnFB" target="_blank">Facebook</a>
       <button id="btnCopiar">Copiar Link</button>
-      <button id="btnDescargar">Descargar para Historia IG</button>
-    </div>
-    <br>
-    <a href="crear.html" class="btn-principal">Pintar el mío también</a>
+    </div><br><a href="crear.html" class="btn-principal">Pintar el mío también</a>
   </div>
-
-  <div id="error" style="display:none">
-    <p>Este graffiti no existe o fue borrado.</p>
-    <a href="index.html" class="btn-principal">Ir a la pared</a>
-  </div>
+  <div id="error" style="display:none"><p>Este graffiti no existe o no se pudo cargar.</p><a href="index.html" class="btn-principal">Ir a la pared</a></div>
+  <div id="debug">Esperando...</div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+function log(m){ document.getElementById('debug').textContent += "\n" + m; console.log(m); }
+log("Script arrancó");
+log("URL: " + location.href);
 
-  const FUENTES = {
-    stencil: 'Black Ops One',
-    bubble: 'Titan One',
-    wildstyle: 'Black Ops One',
-    neon: 'Monoton',
-    tag: 'Permanent Marker'
-  };
+const id = new URLSearchParams(location.search).get('id');
+log("ID buscado: " + id);
 
-  const FONDOS = {
-    ladrillo: '#7a3b2e',
-    hormigon: '#555',
-    negro: '#000',
-    chapa: '#2b4a6f'
-  };
+if (!id) { document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; log("ERROR: no hay id en la URL"); }
 
-  async function cargar() {
-    const id = new URLSearchParams(location.search).get('id');
-    if (!id) { document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; return; }
+const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
+log("URL Supabase: " + SUPABASE_URL.substring(0,30) + "...");
+if (SUPABASE_URL === "TU_SUPABASE_URL") log("ERROR: TODAVIA TENES TU_SUPABASE_URL, pega tu key real!");
 
-    const { data, error } = await supabase.from('graffitis').select('*').eq('id', id).single();
+const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
+const FONDOS = { ladrillo:'#7a3b2e', hormigon:'#555', negro:'#000', chapa:'#2b4a6f' };
+
+async function cargar(){
+  try{
+    if (!window.supabase) { log("ERROR: no cargó librería supabase"); return; }
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    log("Cliente creado, buscando en Supabase...");
+    const { data, error } = await client.from('graffitis').select('*').eq('id', id).single();
+    log("Respuesta: error=" + JSON.stringify(error) + " data=" + JSON.stringify(data));
     if (error || !data) { document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; return; }
-
     document.getElementById('loading').style.display='none';
     document.getElementById('contenido').style.display='block';
-    document.title = `${data.texto} - B4W WALL`;
-
+    document.title = data.texto + " - B4W WALL";
     const cuadro = document.getElementById('cuadro');
     cuadro.style.background = FONDOS[data.fondo] || '#111';
     cuadro.style.color = data.color1;
     if (data.estilo === 'neon') cuadro.style.textShadow = `0 0 20px ${data.color1}, 0 0 40px ${data.color1}`;
-
     const txt = document.getElementById('textoGraffiti');
     txt.textContent = data.texto;
     txt.style.fontFamily = `'${FUENTES[data.estilo]}', sans-serif`;
-
     document.getElementById('estiloGraffiti').textContent = `Estilo: ${data.estilo} • ${data.fondo}`;
     document.getElementById('autor').textContent = `por ${data.autor_alias}`;
     document.getElementById('fecha').textContent = new Date(data.created_at).toLocaleString('es-AR');
-
     const url = location.href;
     const mensaje = `Mirá mi graffiti "${data.texto}" en B4W WALL ${url}`;
     document.getElementById('btnWA').href = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     document.getElementById('btnX').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(mensaje)}`;
     document.getElementById('btnFB').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-
     document.getElementById('btnCopiar').onclick = () => { navigator.clipboard.writeText(url); alert('Link copiado'); };
-    document.getElementById('btnDescargar').onclick = () => {
-      alert('En la próxima versión acá te descarga la imagen en 9:16. Por ahora sacale captura a esta pantalla para subirla a IG.');
-    };
-  }
-  cargar();
+    log("OK - graffiti mostrado");
+  } catch(e){ log("ERROR JS: " + e.message); document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; }
+}
+if (id) cargar();
 </script>
 </body>
 </html>
