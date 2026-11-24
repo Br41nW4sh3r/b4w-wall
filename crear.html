@@ -3,125 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crear Graffiti - B4W WALL</title>
+<title>Pintar - [B4W] WALL</title>
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
+<style>
+  .crear-wrap{max-width:600px;margin:0 auto;padding:20px}
+  .crear-wrap label{display:block;margin:15px 0 5px;font-weight:bold}
+  .crear-wrap input,.crear-wrap select{width:100%;padding:12px;border-radius:10px;border:1px solid #444;background:#222;color:#fff;font-size:16px;box-sizing:border-box}
+  .colores{display:flex;gap:10px}
+  .colores input{height:50px;padding:5px;cursor:pointer}
+  #preview{width:100%;max-width:600px;border-radius:16px;margin-top:20px;display:block}
+  #btnPublicar{width:100%;padding:16px;margin-top:20px;background:#ff2a4d;color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer}
+  #btnPublicar:disabled{opacity:.6}
+</style>
 </head>
 <body>
-<header><a href="index.html">← Volver a la pared</a><h1>CREÁ TU GRAFFITI</h1></header>
+<header><a href="index.html">← Volver a la pared</a><h1>[B4W] <span>WALL</span></h1></header>
 
-<main class="editor">
-  <canvas id="canvas" width="1080" height="1080" style="background:#7a3b2e; max-width:100%; width:500px; height:500px; border-radius:12px;"></canvas>
+<main class="crear-wrap">
+  <h2>Pintá tu graffiti</h2>
 
-  <div class="controles">
-    <input id="texto" type="text" maxlength="20" value="B4W">
-    <input id="alias" type="text" maxlength="20" placeholder="Tu alias... ej: Marcelo">
+  <label>Tu texto</label>
+  <input id="texto" placeholder="Ej: VAMO LOS REDO!!!" maxlength="30" value="VAMO LOS REDO!!!">
 
-    <label>Estilo</label>
-    <select id="estilo">
-      <option value="stencil">Stencil - Callejero</option>
-      <option value="bubble">Bubble - Letras gordas</option>
-      <option value="wildstyle">Wildstyle - Hip Hop</option>
-      <option value="neon">Neón - Cartel</option>
-      <option value="tag">Tag - Firma</option>
-    </select>
+  <label>Estilo</label>
+  <select id="estilo">
+    <option value="stencil">Stencil</option>
+    <option value="bubble">Bubble</option>
+    <option value="wildstyle">Wildstyle</option>
+    <option value="neon" selected>Neón</option>
+    <option value="tag">Tag</option>
+  </select>
 
-    <label>Color principal</label>
-    <input id="color1" type="color" value="#ff2d55">
-    <label>Color secundario</label>
-    <input id="color2" type="color" value="#ffd60a">
+  <label>Fondo - pared real</label>
+  <select id="fondo">
+    <option value="ladrillo" selected>Ladrillo real</option>
+    <option value="hormigon">Hormigón</option>
+    <option value="negro">Pared negra</option>
+    <option value="chapa">Chapa</option>
+  </select>
 
-    <label>Fondo</label>
-    <select id="fondo">
-      <option value="ladrillo">Pared de ladrillo</option>
-      <option value="hormigon">Hormigón</option>
-      <option value="negro">Negro / Noche</option>
-      <option value="chapa">Chapa</option>
-    </select>
-
-    <button id="btnPintar" class="btn-principal">PINTAR EN LA PARED</button>
-    <button id="btnDescargar">Descargar para Historia (9:16)</button>
-    <p id="debug" style="font-size:12px; opacity:0.7"></p>
+  <label>Colores</label>
+  <div class="colores">
+    <input type="color" id="color1" value="#ff2a4d">
+    <input type="color" id="color2" value="#ffffff">
   </div>
+
+  <label>Tu alias</label>
+  <input id="alias" placeholder="Ej: marcelo" value="marcelo">
+
+  <canvas id="preview" width="1080" height="1080"></canvas>
+
+  <button id="btnPublicar">PINTAR Y PUBLICAR</button>
+  <p id="msg" style="text-align:center"></p>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// DIBUJO INLINE - no depende de app.js
-const canvas = document.getElementById('canvas');
+// --- PEGA ACA TUS KEYS REALES ---
+const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
+
+
+const canvas = document.getElementById('preview');
 const ctx = canvas.getContext('2d');
-document.getElementById('debug').textContent = "Canvas encontrado: " + !!canvas;
+
+const FUENTES = {
+  stencil: "'Black Ops One', sans-serif",
+  bubble: "'Titan One', sans-serif",
+  wildstyle: "'Black Ops One', sans-serif",
+  neon: "'Monoton', sans-serif",
+  tag: "'Permanent Marker', cursive"
+};
+
+// FOTOS REALES DE PARED
+const FONDOS_IMG = {
+  ladrillo: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1080&q=80',
+  hormigon: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1080&q=80',
+  negro: 'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=1080&q=80',
+  chapa: 'https://images.unsplash.com/photo-1535732820275-9ffd998cac22?w=1080&q=80'
+};
 
 function dibujar() {
-  const texto = (document.getElementById('texto').value || "B4W").toUpperCase();
+  const texto = document.getElementById('texto').value || 'B4W';
   const estilo = document.getElementById('estilo').value;
+  const fondo = document.getElementById('fondo').value;
   const color1 = document.getElementById('color1').value;
   const color2 = document.getElementById('color2').value;
-  const fondo = document.getElementById('fondo').value;
 
-  let bg = '#7a3b2e';
-  if (fondo === 'hormigon') bg = '#555';
-  if (fondo === 'negro') bg = '#000';
-  if (fondo === 'chapa') bg = '#2b4a6f';
-  ctx.fillStyle = bg;
-  ctx.fillRect(0,0,1080,1080);
+  function dibujarTexto() {
+    // Líneas decorativas
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 2;
+    for (let y = 0; y < 1080; y += 90) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(1080, y);
+      ctx.stroke();
+    }
 
-  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-  for(let y=0; y<1080; y+=90){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(1080,y); ctx.stroke(); }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
 
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowBlur = 0;
+    // Ajustar tamaño según largo del texto
+    let size = 140;
+    if (texto.length > 10) size = 110;
+    if (texto.length > 18) size = 85;
+    if (texto.length > 25) size = 65;
 
-  if (estilo === 'neon') {
-    ctx.font = '110px Monoton, Arial'; ctx.shadowColor = color1; ctx.shadowBlur = 40;
-    ctx.fillStyle = color1; ctx.fillText(texto, 540, 540); ctx.shadowBlur = 0;
-  } else if (estilo === 'tag') {
-    ctx.font = '160px "Permanent Marker", Arial'; ctx.fillStyle = color1;
-    ctx.save(); ctx.translate(540,540); ctx.rotate(-0.08); ctx.fillText(texto, 0, 0); ctx.restore();
-  } else if (estilo === 'bubble') {
-    ctx.font = '140px "Titan One", Arial'; ctx.lineWidth = 20; ctx.strokeStyle = color2; ctx.lineJoin = 'round';
-    ctx.strokeText(texto, 540, 540); ctx.fillStyle = color1; ctx.fillText(texto, 540, 540);
-  } else {
-    ctx.font = '130px "Black Ops One", Arial'; ctx.lineWidth = 10; ctx.strokeStyle = '#000';
-    ctx.strokeText(texto, 540, 540); ctx.fillStyle = color1; ctx.fillText(texto, 540, 540);
-    if (estilo === 'wildstyle') { ctx.font = '60px "Black Ops One", Arial'; ctx.fillStyle = color2; ctx.fillText('★ B4W ★', 540, 720); }
+    ctx.font = `${size}px ${FUENTES[estilo]}`;
+
+    if (estilo === 'neon') {
+      ctx.shadowColor = color1;
+      ctx.shadowBlur = 40;
+      ctx.fillStyle = color1;
+      ctx.fillText(texto, 540, 540);
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#fff';
+      ctx.fillText(texto, 540, 540);
+      ctx.shadowBlur = 0;
+    } else if (estilo === 'bubble') {
+      ctx.lineWidth = 12;
+      ctx.strokeStyle = color2;
+      ctx.strokeText(texto, 540, 540);
+      ctx.fillStyle = color1;
+      ctx.fillText(texto, 540, 540);
+    } else if (estilo === 'tag') {
+      ctx.fillStyle = color1;
+      ctx.save();
+      ctx.translate(540, 540);
+      ctx.rotate(-0.08);
+      ctx.fillText(texto, 0, 0);
+      ctx.restore();
+    } else {
+      // stencil / wildstyle
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = '#000';
+      ctx.strokeText(texto, 540, 540);
+      ctx.fillStyle = color1;
+      ctx.fillText(texto, 540, 540);
+      // sombra 3D
+      ctx.fillStyle = color2;
+      ctx.globalAlpha = 0.35;
+      ctx.fillText(texto, 548, 548);
+      ctx.globalAlpha = 1;
+    }
   }
-  ctx.font = 'bold 30px Arial'; ctx.fillStyle = '#fff'; ctx.fillText('[B4W] WALL', 540, 1000);
-  document.getElementById('debug').textContent = "Dibujado: " + texto + " | " + estilo + " | " + color1;
+
+  // Cargar foto de fondo
+  const imgFondo = new Image();
+  imgFondo.crossOrigin = 'anonymous';
+  imgFondo.src = FONDOS_IMG[fondo] || FONDOS_IMG.ladrillo;
+  imgFondo.onload = () => {
+    ctx.drawImage(imgFondo, 0, 0, 1080, 1080);
+    // oscurecer un poquito para que se lea el texto
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(0, 0, 1080, 1080);
+    dibujarTexto();
+  };
+  imgFondo.onerror = () => {
+    // si falla la foto, fondo plano de respaldo
+    ctx.fillStyle = '#7a3b2e';
+    ctx.fillRect(0, 0, 1080, 1080);
+    dibujarTexto();
+  };
 }
 
-['texto','estilo','color1','color2','fondo'].forEach(id => {
+// Escuchar cambios
+['texto','estilo','fondo','color1','color2'].forEach(id => {
   document.getElementById(id).addEventListener('input', dibujar);
+  document.getElementById(id).addEventListener('change', dibujar);
 });
 
-dibujar();
+// Dibujar al cargar (esperar fuentes)
 document.fonts.ready.then(() => dibujar());
-setTimeout(dibujar, 500);
+dibujar();
 
-// SUPABASE - solo para guardar
-let supabaseClient = null;
-try {
-  const URL = "https://ciwjyflatveowadenini.supabase.co";
-  const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-  if (URL.startsWith("http")) supabaseClient = window.supabase.createClient(URL, KEY);
-} catch(e) { console.log(e); }
+// Publicar
+document.getElementById('btnPublicar').onclick = async () => {
+  const btn = document.getElementById('btnPublicar');
+  const msg = document.getElementById('msg');
+  const texto = document.getElementById('texto').value.trim();
+  if (!texto) { alert('Escribí algo'); return; }
 
-document.getElementById('btnPintar').addEventListener('click', async () => {
-  if (!supabaseClient) return alert('Falta pegar tu URL y KEY de Supabase en crear.html (abajo, donde dice TU_SUPABASE_URL)');
-  const { data, error } = await supabaseClient.from('graffitis').insert([{
-    texto: document.getElementById('texto').value,
-    estilo: document.getElementById('estilo').value,
-    color1: document.getElementById('color1').value,
-    color2: document.getElementById('color2').value,
-    fondo: document.getElementById('fondo').value,
-    autor_alias: document.getElementById('alias').value || 'Anónimo'
-  }]).select().single();
-  if (error) return alert('Error: ' + error.message);
-  window.location.href = `graffiti.html?id=${data.id}`;
-});
+  btn.disabled = true;
+  btn.textContent = 'Pintando...';
+  msg.textContent = '';
 
-document.getElementById('btnDescargar').addEventListener('click', () => {
-  const a = document.createElement('a'); a.download = 'mi-graffiti-b4w.png'; a.href = canvas.toDataURL('image/png'); a.click();
-});
+  try {
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data, error } = await client.from('graffitis').insert([{
+      texto: texto,
+      estilo: document.getElementById('estilo').value,
+      fondo: document.getElementById('fondo').value,
+      color1: document.getElementById('color1').value,
+      color2: document.getElementById('color2').value,
+      autor_alias: document.getElementById('alias').value.trim() || 'Anónimo'
+    }]).select().single();
+
+    if (error) throw error;
+    window.location.href = `graffiti.html?id=${data.id}`;
+  } catch(e) {
+    console.error(e);
+    msg.textContent = 'Error al publicar: ' + e.message;
+    btn.disabled = false;
+    btn.textContent = 'PINTAR Y PUBLICAR';
+  }
+};
 </script>
 </body>
 </html>

@@ -8,8 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
 <style>
   .graffiti-detalle{max-width:600px;margin:0 auto;padding:20px;text-align:center}
-  .graffiti-cuadro{border-radius:16px;padding:40px 20px;min-height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center}
-  .graffiti-texto{font-size:64px;line-height:1;word-break:break-word}
+  .graffiti-cuadro{border-radius:16px;padding:40px 20px;min-height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center;background-size:cover;background-position:center;position:relative;overflow:hidden}
+  .graffiti-cuadro::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.25)}
+  .graffiti-texto{font-size:64px;line-height:1;word-break:break-word;position:relative;z-index:1;text-shadow:3px 3px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000}
   .share-box{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
   .share-box a,.share-box button{background:#222;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;border:none;cursor:pointer}
   .share-box a.whatsapp{background:#25D366;color:#000;font-weight:bold}
@@ -20,7 +21,7 @@
 <main class="graffiti-detalle">
   <div id="loading">Cargando graffiti...</div>
   <div id="contenido" style="display:none">
-    <div id="cuadro" class="graffiti-cuadro"><div id="textoGraffiti" class="graffiti-texto"></div><div id="estiloGraffiti" style="margin-top:15px"></div></div>
+    <div id="cuadro" class="graffiti-cuadro"><div id="textoGraffiti" class="graffiti-texto"></div><div id="estiloGraffiti" style="margin-top:15px;position:relative;z-index:1;text-shadow:1px 1px 0 #000"></div></div>
     <h2 id="autor"></h2><p id="fecha"></p>
     <div class="share-box">
       <a id="btnWA" class="whatsapp" target="_blank">WhatsApp</a>
@@ -42,7 +43,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 
 const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
-const FONDOS = { ladrillo:'#7a3b2e', hormigon:'#555', negro:'#000', chapa:'#2b4a6f' };
+
+// MISMAS FOTOS QUE EN crear.html
+const FONDOS_IMG = {
+  ladrillo: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&q=80',
+  hormigon: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80',
+  negro: 'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=800&q=80',
+  chapa: 'https://images.unsplash.com/photo-1535732820275-9ffd998cac22?w=800&q=80'
+};
+
 async function cargar(){
   try{
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -51,7 +60,7 @@ async function cargar(){
     document.getElementById('loading').style.display='none';
     document.getElementById('contenido').style.display='block';
     const cuadro = document.getElementById('cuadro');
-    cuadro.style.background = FONDOS[data.fondo] || '#111';
+    cuadro.style.backgroundImage = `url(${FONDOS_IMG[data.fondo] || FONDOS_IMG.ladrillo})`;
     cuadro.style.color = data.color1;
     if (data.estilo === 'neon') cuadro.style.textShadow = `0 0 20px ${data.color1}, 0 0 40px ${data.color1}`;
     const txt = document.getElementById('textoGraffiti');
