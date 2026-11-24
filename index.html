@@ -3,58 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>B4W WALL</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+<title>[B4W] WALL</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
-  header{padding:24px 20px;display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto}
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:42px}
-  .logo span{color:#ff2d55}
-  .btn-crear{background:#ff2d55;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:14px}
-  .hero{text-align:center;padding:10px 20px 20px}
-  .hero h1{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:0.9}
-  .hero h1 span{color:#ff2d55}
-  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;padding:20px}
+  .grid{max-width:1100px;margin:0 auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
   .card{background:#1a1a1a;border-radius:16px;overflow:hidden;text-decoration:none;color:#fff;display:block}
-  .card-wall{width:100%;height:220px;background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
-  .card-wall span{font-family:'Permanent Marker',cursive;font-size:32px;line-height:1.1;text-shadow:2px 2px 0 rgba(0,0,0,0.4);word-break:break-word}
+  .card canvas{width:100%;display:block;aspect-ratio:1}
   .card-body{padding:14px 16px}
   .card-body h3{font-size:15px}
-  .card-body p{font-size:13px;opacity:0.6}
-  #loading{text-align:center;padding:40px;opacity:0.6}
+  .card-body p{font-size:13px;opacity:.6}
 </style>
 </head>
 <body>
-<header><div class="logo">[B4W] <span>WALL</span></div><a class="btn-crear" href="crear.html">+ Pintar el mío</a></header>
-<div class="hero"><h1>LA PARED<br><span>ES TUYA</span></h1></div>
-<div id="loading">Cargando pared...</div>
-<div id="grid"></div>
+<header><h1>[B4W] <span>WALL</span></h1><a href="crear.html" style="background:#ff2a4d;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">+ Pintar el mío</a></header>
+<main><div style="text-align:center;padding:10px 20px"><h2 style="font-size:50px;line-height:.9">LA PARED<br>ES TUYA</h2></div><div id="loading" style="text-align:center;padding:40px;opacity:.6">Cargando pared...</div><div class="grid" id="grid"></div></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const FUENTES = { stencil:"'Black Ops One', sans-serif", bubble:"'Titan One', sans-serif", wildstyle:"'Black Ops One', sans-serif", neon:"'Monoton', sans-serif", tag:"'Permanent Marker', cursive" };
+const FONDOS = {
+  ladrillo: { src:'ladrillo.jpg', cropTop:0, cropH:0.72 },
+  hormigon: { src:'hormigon.jpg', cropTop:0, cropH:0.88 },
+  negro: { src:'negro.jpg', cropTop:0, cropH:1 },
+  chapa: { src:'chapa.jpg', cropTop:0, cropH:1 }
+};
+function dibujarEnCanvas(canvas, g){
+  const ctx = canvas.getContext('2d');
+  const cfg = FONDOS[g.fondo] || FONDOS.ladrillo;
+  const img = new Image(); img.src = cfg.src;
+  img.onload = () => {
+    const sw = img.width, sh = img.height * cfg.cropH, sy = img.height * cfg.cropTop;
+    ctx.drawImage(img, 0, sy, sw, sh, 0, 0, 1080, 1080);
+    const texto = g.texto || 'B4W';
+    const estilo = g.estilo || 'neon';
+    const color1 = g.color1 || '#ff2a4d';
+    const color2 = g.color2 || '#ffffff';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    let lineas=[texto]; let size=130;
+    if(texto.length>12){ size=95; lineas=[texto.slice(0,Math.ceil(texto.length/2)), texto.slice(Math.ceil(texto.length/2))]; }
+    if(texto.length>20) size=75;
+    ctx.font=`${size}px ${FUENTES[estilo]}`;
+    ctx.globalAlpha=0.94;
+    const centroY=540;
+    lineas.forEach((linea,i)=>{
+      const y = lineas.length===1 ? centroY : centroY-70+i*140;
+      if(estilo==='neon'){ ctx.shadowColor=color1; ctx.shadowBlur=35; ctx.fillStyle=color1; ctx.fillText(linea,540,y); ctx.shadowBlur=12; ctx.fillStyle='#fff'; ctx.fillText(linea,540,y); ctx.shadowBlur=0; }
+      else if(estilo==='bubble'){ ctx.lineWidth=10; ctx.strokeStyle=color2; ctx.strokeText(linea,540,y); ctx.fillStyle=color1; ctx.fillText(linea,540,y); }
+      else if(estilo==='tag'){ ctx.save(); ctx.translate(540,y); ctx.rotate(-0.06); ctx.fillStyle=color1; ctx.fillText(linea,0,0); ctx.restore(); }
+      else { ctx.lineWidth=7; ctx.strokeStyle='rgba(0,0,0,0.85)'; ctx.strokeText(linea,540,y); ctx.fillStyle=color1; ctx.fillText(linea,540,y); }
+    });
+    ctx.globalAlpha=1;
+  };
+  img.onerror = () => { ctx.fillStyle='#333'; ctx.fillRect(0,0,1080,1080); ctx.fillStyle='#fff'; ctx.font='30px sans-serif'; ctx.fillText('Falta '+cfg.src,540,540); };
+}
 async function cargar(){
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const { data, error } = await client.from('graffitis').select('*').order('created_at',{ascending:false});
+  document.getElementById('loading').style.display='none';
+  if(error){ document.getElementById('loading').textContent='Error'; return; }
   const grid=document.getElementById('grid');
-  const loading=document.getElementById('loading');
-  const { data, error } = await supabaseClient.from('graffitis').select('*').order('created_at',{ascending:false});
-  loading.style.display='none';
-  if(error){ loading.textContent='Error'; return; }
-  grid.innerHTML='';
+  await document.fonts.ready;
   data.forEach(g=>{
-    const a=document.createElement('a'); a.className='card'; a.href='graffiti.html?id='+encodeURIComponent(g.id);
-    const wall=document.createElement('div'); wall.className='card-wall';
-    const s=document.createElement('span'); s.textContent=g.texto||'';
-    s.style.color=g.color1||'#000';
-    wall.appendChild(s);
+    const a=document.createElement('a'); a.className='card'; a.href='graffiti.html?id='+g.id;
+    const c=document.createElement('canvas'); c.width=1080; c.height=1080;
     const body=document.createElement('div'); body.className='card-body';
-    const h3=document.createElement('h3'); h3.textContent=g.texto||'';
-    const p=document.createElement('p'); p.textContent='por '+(g.author||'marcelo')+' • '+(g.estilo||'tag');
-    body.appendChild(h3); body.appendChild(p);
-    a.appendChild(wall); a.appendChild(body);
-    grid.appendChild(a);
+    body.innerHTML='<h3>'+(g.texto||'')+'</h3><p>por '+(g.autor_alias||'Anónimo')+' • '+(g.estilo||'')+' • '+(g.fondo||'')+'</p>';
+    a.appendChild(c); a.appendChild(body); grid.appendChild(a);
+    dibujarEnCanvas(c,g);
   });
 }
 cargar();

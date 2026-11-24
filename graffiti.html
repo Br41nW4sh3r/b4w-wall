@@ -3,91 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graffiti - B4W</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+<title>Graffiti - [B4W] WALL</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;text-align:center}
-  header{padding:24px 20px;max-width:800px;margin:0 auto}
-  .back{color:#a855f7;text-decoration:none;font-size:14px}
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:42px;margin-top:10px}
-  .logo span{color:#ff2d55}
-  .box{max-width:800px;margin:0 auto;padding:0 20px 40px}
-  #wall{width:100%;max-width:650px;margin:20px auto;border-radius:16px;height:380px;background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1000&q=80');background-size:cover;background-position:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative}
-  #wallText{font-family:'Permanent Marker',cursive;font-size:54px;color:#000;line-height:1;word-break:break-word;text-shadow:2px 2px 0 rgba(255,255,255,0.2)}
-  #estiloBadge{margin-top:14px;background:rgba(0,0,0,0.6);padding:6px 14px;border-radius:999px;font-size:13px}
+  .box{max-width:650px;margin:0 auto;padding:0 20px 40px;text-align:center}
+  #wall{width:100%;border-radius:16px;display:block}
   #autor{font-size:22px;font-weight:800;margin-top:20px}
-  #fecha{opacity:0.6;margin-top:8px}
+  #fecha{opacity:.6;margin-top:8px}
   .row{display:flex;gap:12px;justify-content:center;margin-top:20px}
   .row button,.row a{padding:14px 20px;border-radius:12px;border:none;font-weight:700;cursor:pointer;text-decoration:none;font-size:14px}
-  .btn-down{background:#1a1a1a;color:#fff;flex:1}
+  .btn-down{background:#222;color:#fff;flex:1}
   .btn-share{background:#22c55e;color:#000;flex:1}
-  .btn-mini{background:#1a1a1a;color:#fff;padding:12px 16px;border-radius:12px}
-  #btnPintar{background:#ff2d55;color:#fff;padding:14px 24px;border-radius:12px;border:none;font-weight:800;margin-top:20px;cursor:pointer}
-  #loading{padding:60px;opacity:0.6}
+  .btn-mini{background:#222;color:#fff;padding:12px 16px;border-radius:12px}
+  #btnPintar{background:#ff2a4d;color:#fff;padding:14px 24px;border-radius:12px;border:none;font-weight:800;margin-top:20px;cursor:pointer}
 </style>
 </head>
 <body>
-<header><a class="back" href="index.html">← Volver a la pared</a><div class="logo">[B4W] <span>WALL</span></div></header>
+<header><a href="index.html">← Volver a la pared</a><h1>[B4W] <span>WALL</span></h1></header>
 <div class="box">
-  <div id="loading">Cargando graffiti...</div>
+  <div id="loading" style="padding:60px;opacity:.6">Cargando graffiti...</div>
   <div id="content" style="display:none">
-    <div id="wall"><div id="wallText"></div><div id="estiloBadge"></div></div>
-    <div id="autor"></div>
-    <div id="fecha"></div>
-    <div class="row">
-      <button class="btn-down" id="btnDown">⬇ Descargar foto</button>
-      <button class="btn-share" id="btnShare">📤 Compartir foto</button>
-    </div>
-    <div class="row">
-      <a class="btn-mini" id="btnWa" target="_blank" href="#">WhatsApp (link)</a>
-      <a class="btn-mini" id="btnX" target="_blank" href="#">X</a>
-      <a class="btn-mini" id="btnFb" target="_blank" href="#">Facebook</a>
-      <button class="btn-mini" id="btnCopy">Copiar Link</button>
-    </div>
+    <canvas id="wall" width="1080" height="1080"></canvas>
+    <div id="autor"></div><div id="fecha"></div>
+    <div class="row"><button class="btn-down" id="btnDown">⬇ Descargar foto</button><button class="btn-share" id="btnShare">📤 Compartir foto</button></div>
+    <div class="row"><a class="btn-mini" id="btnWa" target="_blank" href="#">WhatsApp</a><a class="btn-mini" id="btnX" target="_blank" href="#">X</a><a class="btn-mini" id="btnFb" target="_blank" href="#">Facebook</a><button class="btn-mini" id="btnCopy">Copiar Link</button></div>
     <button id="btnPintar" onclick="window.location.href='crear.html'">Pintar el mío también</button>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const FUENTES = { stencil:"'Black Ops One', sans-serif", bubble:"'Titan One', sans-serif", wildstyle:"'Black Ops One', sans-serif", neon:"'Monoton', sans-serif", tag:"'Permanent Marker', cursive" };
+const FONDOS = {
+  ladrillo: { src:'ladrillo.jpg', cropTop:0, cropH:0.72 },
+  hormigon: { src:'hormigon.jpg', cropTop:0, cropH:0.88 },
+  negro: { src:'negro.jpg', cropTop:0, cropH:1 },
+  chapa: { src:'chapa.jpg', cropTop:0, cropH:1 }
+};
 let current=null;
+const canvas=document.getElementById('wall');
+const ctx=canvas.getContext('2d');
 async function cargar(){
   const id=new URLSearchParams(window.location.search).get('id')||'';
   if(!/^[0-9a-fA-F-]{36}$/.test(id)){ document.getElementById('loading').textContent='Este graffiti no existe.'; return; }
-  const { data, error } = await supabaseClient.from('graffitis').select('*').eq('id', id).single();
+  const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const { data, error } = await client.from('graffitis').select('*').eq('id',id).single();
   if(error||!data){ document.getElementById('loading').textContent='Este graffiti no existe.'; return; }
   current=data;
+  await document.fonts.ready;
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';
-  document.getElementById('wallText').textContent=data.texto||'';
-  document.getElementById('wallText').style.color=data.color1||'#000';
-  document.getElementById('estiloBadge').textContent='Estilo: '+(data.estilo||'tag')+' • ladrillo';
-  document.getElementById('autor').textContent='por '+(data.author||'marcelo');
+  const cfg=FONDOS[data.fondo]||FONDOS.ladrillo;
+  const img=new Image(); img.src=cfg.src;
+  img.onload=()=>{
+    const sw=img.width, sh=img.height*cfg.cropH, sy=img.height*cfg.cropTop;
+    ctx.drawImage(img,0,sy,sw,sh,0,0,1080,1080);
+    const texto=data.texto||'B4W'; const estilo=data.estilo||'neon'; const color1=data.color1||'#ff2a4d'; const color2=data.color2||'#ffffff';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    let lineas=[texto]; let size=130;
+    if(texto.length>12){ size=95; lineas=[texto.slice(0,Math.ceil(texto.length/2)), texto.slice(Math.ceil(texto.length/2))]; }
+    if(texto.length>20) size=75;
+    ctx.font=`${size}px ${FUENTES[estilo]}`; ctx.globalAlpha=0.94;
+    const centroY=540;
+    lineas.forEach((linea,i)=>{
+      const y=lineas.length===1?centroY:centroY-70+i*140;
+      if(estilo==='neon'){ ctx.shadowColor=color1; ctx.shadowBlur=35; ctx.fillStyle=color1; ctx.fillText(linea,540,y); ctx.shadowBlur=12; ctx.fillStyle='#fff'; ctx.fillText(linea,540,y); ctx.shadowBlur=0; }
+      else if(estilo==='bubble'){ ctx.lineWidth=10; ctx.strokeStyle=color2; ctx.strokeText(linea,540,y); ctx.fillStyle=color1; ctx.fillText(linea,540,y); }
+      else if(estilo==='tag'){ ctx.save(); ctx.translate(540,y); ctx.rotate(-0.06); ctx.fillStyle=color1; ctx.fillText(linea,0,0); ctx.restore(); }
+      else { ctx.lineWidth=7; ctx.strokeStyle='rgba(0,0,0,0.85)'; ctx.strokeText(linea,540,y); ctx.fillStyle=color1; ctx.fillText(linea,540,y); }
+    });
+    ctx.globalAlpha=1;
+  };
+  document.getElementById('autor').textContent='por '+(data.autor_alias||'Anónimo');
   document.getElementById('fecha').textContent=data.created_at?new Date(data.created_at).toLocaleString('es-AR'):'';
   document.getElementById('btnWa').href='https://wa.me/?text='+encodeURIComponent('Mirá este graffiti: '+window.location.href);
   document.getElementById('btnX').href='https://twitter.com/intent/tweet?text='+encodeURIComponent('Mirá este graffiti: '+window.location.href);
   document.getElementById('btnFb').href='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(window.location.href);
   document.getElementById('btnCopy').onclick=()=>{ navigator.clipboard.writeText(window.location.href); alert('Link copiado'); };
 }
-async function descargar(){
-  if(!current) return;
-  const canvas=await html2canvas(document.getElementById('wall'),{useCORS:true});
-  const a=document.createElement('a'); a.download='b4w-graffiti.png'; a.href=canvas.toDataURL('image/png'); a.click();
-}
+function descargar(){ const a=document.createElement('a'); a.download='b4w-graffiti.png'; a.href=canvas.toDataURL('image/png'); a.click(); }
 document.getElementById('btnDown').onclick=descargar;
 document.getElementById('btnShare').onclick=async ()=>{
   try{
-    const canvas=await html2canvas(document.getElementById('wall'),{useCORS:true});
-    canvas.toBlob(async (blob)=>{
-      const file=new File([blob],'b4w.png',{type:'image/png'});
-      if(navigator.share){ await navigator.share({files:[file], title:'B4W'}); }
-      else descargar();
-    });
+    canvas.toBlob(async (blob)=>{ const file=new File([blob],'b4w.png',{type:'image/png'}); if(navigator.share){ await navigator.share({files:[file]}); } else descargar(); });
   }catch(e){ descargar(); }
 };
 cargar();
