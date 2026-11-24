@@ -24,17 +24,28 @@
 <div id="vacio" style="display:none;text-align:center;padding:40px">Todavía no hay graffitis. ¡Sé el primero!</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
+const SUPABASE_URL = "TU_SUPABASE_URL";
+const SUPABASE_KEY = "TU_ANON_KEY";
 const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
 const FONDOS = { ladrillo:'ladrillo.jpg', hormigon:'hormigon.jpg', negro:'negro.jpg', chapa:'chapa.jpg' };
 let todos = []; let filtroActual = 'todos';
+
+// SEGURIDAD: lista blanca de valores permitidos, si viene algo raro de la DB se descarta
+function esSeguro(g){
+  if(!g || typeof g.texto !== 'string' || typeof g.autor_alias !== 'string') return false;
+  if(!FUENTES[g.estilo] || !FONDOS[g.fondo]) return false;
+  if(!/^#[0-9a-fA-F]{6}$/.test(g.color1)) return false;
+  if(!/^#[0-9a-fA-F]{6}$/.test(g.color2)) return false;
+  if(g.texto.length > 30 || g.autor_alias.length > 20) return false;
+  return true;
+}
 async function cargarPared(){
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const { data, error } = await client.from('graffitis').select('*').order('created_at', { ascending:false });
+  const { data, error } = await client.from('graffitis').select('*').order('created_at', { ascending:false }).limit(100);
   document.getElementById('loading').style.display='none';
   if (error || !data) { document.getElementById('vacio').style.display='block'; return; }
-  todos = data; dibujar();
+  todos = data.filter(esSeguro);
+  dibujar();
 }
 function dibujar(){
   const pared = document.getElementById('pared'); pared.innerHTML = '';
@@ -42,11 +53,23 @@ function dibujar(){
   if (lista.length === 0) { document.getElementById('vacio').style.display='block'; return; }
   document.getElementById('vacio').style.display='none';
   lista.forEach(g => {
-    const a = document.createElement('a'); a.className = 'card'; a.href = `graffiti.html?id=${g.id}`;
-    a.style.backgroundImage = `url(${FONDOS[g.fondo] || FONDOS.ladrillo})`; a.style.color = g.color1;
-    // En negro no usar multiply porque se pierde, en las otras sí para que se funda
-    const blend = g.fondo === 'negro' ? 'normal' : 'multiply';
-    a.innerHTML = `<div class="card-texto" style="font-family:'${FUENTES[g.estilo]}',sans-serif;mix-blend-mode:${blend}">${g.texto}</div><div class="card-autor">por ${g.autor_alias} • ${g.estilo}</div>`;
+    const a = document.createElement('a');
+    a.className = 'card';
+    // SEGURIDAD: id numérico solamente, si no es número no se arma link
+    if(!/^[0-9]+$/.test(String(g.id))) return;
+    a.href = `graffiti.html?id=${g.id}`;
+    a.style.backgroundImage = `url(${FONDOS[g.fondo]})`;
+    a.style.color = g.color1;
+    // SEGURIDAD: textContent, NUNCA innerHTML con datos del usuario
+    const txt = document.createElement('div');
+    txt.className = 'card-texto';
+    txt.style.fontFamily = `'${FUENTES[g.estilo]}', sans-serif`;
+    txt.style.mixBlendMode = g.fondo === 'negro' ? 'normal' : 'multiply';
+    txt.textContent = g.texto;
+    const autor = document.createElement('div');
+    autor.className = 'card-autor';
+    autor.textContent = `por ${g.autor_alias} • ${g.estilo}`;
+    a.appendChild(txt); a.appendChild(autor);
     pared.appendChild(a);
   });
 }

@@ -30,23 +30,24 @@
       <button id="btnDescargarFoto">⬇ Descargar foto</button>
       <button id="btnCompartirFoto">📲 Compartir foto</button>
     </div>
-    <div class="share-box"><a id="btnWA" class="whatsapp" target="_blank">WhatsApp (link)</a><a id="btnX" target="_blank">X</a><a id="btnFB" target="_blank">Facebook</a><button id="btnCopiar">Copiar Link</button></div><br><a href="crear.html" class="btn-principal">Pintar el mío también</a>
+    <div class="share-box"><a id="btnWA" class="whatsapp" target="_blank" rel="noopener">WhatsApp (link)</a><a id="btnX" target="_blank" rel="noopener">X</a><a id="btnFB" target="_blank" rel="noopener">Facebook</a><button id="btnCopiar">Copiar Link</button></div><br><a href="crear.html" class="btn-principal">Pintar el mío también</a>
     <canvas id="canvasOculto" width="1080" height="1080" style="display:none"></canvas>
   </div>
   <div id="error" style="display:none"><p>Este graffiti no existe.</p><a href="index.html" class="btn-principal">Ir a la pared</a></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const id = new URLSearchParams(location.search).get('id');
+const params = new URLSearchParams(location.search);
+const idRaw = params.get('id');
+// SEGURIDAD: el id tiene que ser solo números, si no, no buscamos nada
+const id = /^[0-9]+$/.test(idRaw || '') ? idRaw : null;
 if (!id) { document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; }
-const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
+const SUPABASE_URL = "TU_SUPABASE_URL";
+const SUPABASE_KEY = "TU_ANON_KEY";
 const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
 const FONDOS = { ladrillo:'ladrillo.jpg', hormigon:'hormigon.jpg', negro:'negro.jpg', chapa:'chapa.jpg' };
 const FONDOS_CROP = { ladrillo:0.72, hormigon:0.88, negro:1, chapa:1 };
 let datos = null;
-let canvasListo = false;
-
 function generarImagen() {
   return new Promise((resolve) => {
     const canvas = document.getElementById('canvasOculto');
@@ -55,7 +56,6 @@ function generarImagen() {
     img.onload = () => {
       const cropH = FONDOS_CROP[datos.fondo] || 1;
       ctx.drawImage(img, 0, 0, img.width, img.height * cropH, 0, 0, 1080, 1080);
-      // mismo dibujo que en crear.html
       const texto = datos.texto; const estilo = datos.estilo;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       let lineas = [texto]; let size = 130;
@@ -70,7 +70,7 @@ function generarImagen() {
         else if (estilo === 'tag') { ctx.save(); ctx.translate(540, y); ctx.rotate(-0.06); ctx.fillStyle = datos.color1; ctx.fillText(linea, 0, 0); ctx.restore(); }
         else { ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(linea, 540, y); ctx.fillStyle = datos.color1; ctx.fillText(linea, 540, y); }
       });
-      ctx.globalAlpha = 1; canvasListo = true; resolve(canvas);
+      ctx.globalAlpha = 1; resolve(canvas);
     };
   });
 }
@@ -79,14 +79,18 @@ async function cargar(){
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data, error } = await client.from('graffitis').select('*').eq('id', id).single();
     if (error || !data) throw new Error("no data");
+    // SEGURIDAD: validar lo que viene de la DB antes de mostrar
+    if(!FUENTES[data.estilo] || !FONDOS[data.fondo]) throw new Error("datos no válidos");
+    if(!/^#[0-9a-fA-F]{6}$/.test(data.color1)) throw new Error("color no válido");
+    if(typeof data.texto !== 'string' || data.texto.length > 30) throw new Error("texto no válido");
     datos = data;
     document.getElementById('loading').style.display='none';
     document.getElementById('contenido').style.display='block';
     const cuadro = document.getElementById('cuadro');
-    cuadro.style.backgroundImage = `url(${FONDOS[data.fondo] || FONDOS.ladrillo})`;
+    cuadro.style.backgroundImage = `url(${FONDOS[data.fondo]})`;
     cuadro.style.color = data.color1;
     const txt = document.getElementById('textoGraffiti');
-    txt.textContent = data.texto;
+    txt.textContent = data.texto; // SEGURIDAD: textContent, no innerHTML
     txt.style.fontFamily = `'${FUENTES[data.estilo]}', sans-serif`;
     txt.style.mixBlendMode = data.fondo === 'negro' ? 'normal' : 'multiply';
     document.getElementById('estiloGraffiti').textContent = `Estilo: ${data.estilo} • ${data.fondo}`;
@@ -103,12 +107,14 @@ async function cargar(){
 }
 if (id) cargar();
 document.getElementById('btnDescargarFoto').onclick = async () => {
+  if(!datos) return;
   const canvas = await generarImagen();
   const a = document.createElement('a');
   a.download = `b4w-${datos.texto.toLowerCase().replace(/[^a-z0-9]+/g,'-')}.jpg`;
   a.href = canvas.toDataURL('image/jpeg', 0.92); a.click();
 };
 document.getElementById('btnCompartirFoto').onclick = async () => {
+  if(!datos) return;
   const canvas = await generarImagen();
   canvas.toBlob(async (blob) => {
     const file = new File([blob], 'b4w-graffiti.jpg', { type: 'image/jpeg' });
