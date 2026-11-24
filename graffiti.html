@@ -34,23 +34,25 @@
     </div><br><a href="crear.html" class="btn-principal">Pintar el mío también</a>
   </div>
   <div id="error" style="display:none"><p>Este graffiti no existe o no se pudo cargar.</p><a href="index.html" class="btn-principal">Ir a la pared</a></div>
+  <!--
   <div id="debug">Esperando...</div>
+  -->
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-function log(m){ document.getElementById('debug').textContent += "\n" + m; console.log(m); }
-log("Script arrancó");
-log("URL: " + location.href);
+//function log(m){ document.getElementById('debug').textContent += "\n" + m; console.log(m); }
+//log("Script arrancó");
+//log("URL: " + location.href);
 
 const id = new URLSearchParams(location.search).get('id');
-log("ID buscado: " + id);
+//log("ID buscado: " + id);
 
 if (!id) { document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; log("ERROR: no hay id en la URL"); }
 
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-log("URL Supabase: " + SUPABASE_URL.substring(0,30) + "...");
+//log("URL Supabase: " + SUPABASE_URL.substring(0,30) + "...");
 if (SUPABASE_URL === "TU_SUPABASE_URL") log("ERROR: TODAVIA TENES TU_SUPABASE_URL, pega tu key real!");
 
 const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
