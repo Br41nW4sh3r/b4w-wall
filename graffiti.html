@@ -42,8 +42,8 @@ const idRaw = params.get('id');
 // SEGURIDAD: el id tiene que ser solo números, si no, no buscamos nada
 const id = /^[0-9]+$/.test(idRaw || '') ? idRaw : null;
 if (!id) { document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; }
-const SUPABASE_URL = "TU_SUPABASE_URL";
-const SUPABASE_KEY = "TU_ANON_KEY";
+const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
 const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
 const FONDOS = { ladrillo:'ladrillo.jpg', hormigon:'hormigon.jpg', negro:'negro.jpg', chapa:'chapa.jpg' };
 const FONDOS_CROP = { ladrillo:0.72, hormigon:0.88, negro:1, chapa:1 };
