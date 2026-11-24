@@ -3,168 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pintar - [B4W] WALL</title>
-<link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
+<title>Crear - B4W</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  .crear-wrap{max-width:600px;margin:0 auto;padding:20px}
-  .crear-wrap label{display:block;margin:15px 0 5px;font-weight:bold}
-  .crear-wrap input,.crear-wrap select{width:100%;padding:12px;border-radius:10px;border:1px solid #444;background:#222;color:#fff;font-size:16px;box-sizing:border-box}
-  .colores{display:flex;gap:10px}
-  .colores input{height:50px;padding:5px;cursor:pointer}
-  #preview{width:100%;max-width:600px;border-radius:16px;margin-top:20px;display:block}
-  #btnPublicar{width:100%;padding:16px;margin-top:20px;background:#ff2a4d;color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer}
-  .share-row{display:flex;gap:10px;margin-top:12px}
-  .share-row button{flex:1;padding:14px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;font-size:15px}
-  #btnDescargar{background:#222;color:#fff}
-  #btnCompartir{background:#25D366;color:#000}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+  header{padding:24px 20px;display:flex;justify-content:space-between;align-items:center;max-width:700px;margin:0 auto}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:32px}
+  .logo span{color:#ff2d55}
+  .back{color:#fff;opacity:0.7;text-decoration:none;font-size:14px}
+  .box{max-width:700px;margin:20px auto;padding:0 20px}
+  h1{font-family:'Bebas Neue',sans-serif;font-size:48px;margin-bottom:20px}
+  label{display:block;font-size:13px;font-weight:600;margin:16px 0 6px;opacity:0.8}
+  input,textarea{width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;padding:14px;border-radius:12px;font-family:inherit;font-size:15px}
+  textarea{height:90px;resize:vertical}
+  input[type="file"]{padding:12px}
+  button{width:100%;background:#ff2d55;color:#fff;border:none;padding:16px;border-radius:999px;font-weight:800;font-size:16px;margin-top:24px;cursor:pointer}
+  button:disabled{opacity:0.5}
+  #msg{text-align:center;margin-top:14px;font-size:14px;min-height:20px}
+  #preview{width:100%;max-height:300px;object-fit:cover;border-radius:12px;display:none;margin-top:12px}
 </style>
 </head>
 <body>
-<header><a href="index.html">← Volver a la pared</a><h1>[B4W] <span>WALL</span></h1></header>
-<main class="crear-wrap">
-  <h2>Pintá tu graffiti</h2>
-  <label>Tu texto</label>
-  <input id="texto" placeholder="Ej: VAMO LOS REDO!!!" maxlength="30" value="VAMO LOS REDO!!!">
-  <label>Estilo</label>
-  <select id="estilo">
-    <option value="stencil">Stencil</option>
-    <option value="bubble">Bubble</option>
-    <option value="wildstyle">Wildstyle</option>
-    <option value="neon" selected>Neón</option>
-    <option value="tag">Tag</option>
-  </select>
-  <label>Fondo - tus paredes</label>
-  <select id="fondo">
-    <option value="ladrillo" selected>Ladrillo rojo</option>
-    <option value="hormigon">Hormigón</option>
-    <option value="negro">Negro</option>
-    <option value="chapa">Chapa</option>
-  </select>
-  <label>Colores</label>
-  <div class="colores"><input type="color" id="color1" value="#ff2a4d"><input type="color" id="color2" value="#ffffff"></div>
-  <label>Tu alias</label>
-  <input id="alias" placeholder="Ej: marcelo" value="marcelo" maxlength="20">
-  <canvas id="preview" width="1080" height="1080"></canvas>
-  <div class="share-row">
-    <button id="btnDescargar">⬇ Descargar imagen</button>
-    <button id="btnCompartir">📲 Compartir foto</button>
-  </div>
-  <button id="btnPublicar">PINTAR Y PUBLICAR</button>
-  <p id="msg" style="text-align:center"></p>
-</main>
+<header>
+  <div class="logo">B4W<span>.</span></div>
+  <a class="back" href="index.html">← Volver</a>
+</header>
+<div class="box">
+  <h1>CREÁ TU GRAFFITI</h1>
+  <label>Título *</label>
+  <input id="title" maxlength="80" placeholder="Ej: Mi primer tag">
+  <label>Autor / Apodo</label>
+  <input id="author" maxlength="40" placeholder="Ej: B4W">
+  <label>Descripción</label>
+  <textarea id="desc" maxlength="500" placeholder="Contanos algo..."></textarea>
+  <label>Foto *</label>
+  <input id="file" type="file" accept="image/*">
+  <img id="preview" alt="">
+  <button id="btn">PUBLICAR EN LA PARED →</button>
+  <div id="msg"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-const canvas = document.getElementById('preview');
-const ctx = canvas.getContext('2d');
-const FUENTES = { stencil:"'Black Ops One', sans-serif", bubble:"'Titan One', sans-serif", wildstyle:"'Black Ops One', sans-serif", neon:"'Monoton', sans-serif", tag:"'Permanent Marker', cursive" };
-const FONDOS = {
-  ladrillo: { src:'ladrillo.jpg', cropTop:0, cropH:0.72 },
-  hormigon: { src:'hormigon.jpg', cropTop:0, cropH:0.88 },
-  negro: { src:'negro.jpg', cropTop:0, cropH:1 },
-  chapa: { src:'chapa.jpg', cropTop:0, cropH:1 }
-};
-// SEGURIDAD: lista de palabras que no van
-const PROHIBIDAS = ['puto','puta','concha','pija','poronga','mierda','chupame','forro','pelotudo'];
-function esTextoValido(t){
-  const low = t.toLowerCase();
-  return !PROHIBIDAS.some(p => low.includes(p));
-}
-function dibujar() {
-  const texto = document.getElementById('texto').value || 'B4W';
-  const estilo = document.getElementById('estilo').value;
-  const fondo = document.getElementById('fondo').value;
-  const color1 = document.getElementById('color1').value;
-  const color2 = document.getElementById('color2').value;
-  function dibujarTexto() {
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    let lineas = [texto]; let size = 130;
-    if (texto.length > 12) { size = 95; lineas = [texto.slice(0, Math.ceil(texto.length/2)), texto.slice(Math.ceil(texto.length/2))]; }
-    if (texto.length > 20) size = 75;
-    ctx.font = `${size}px ${FUENTES[estilo]}`;
-    ctx.globalAlpha = 0.94;
-    const centroY = 540;
-    lineas.forEach((linea, i) => {
-      const y = lineas.length === 1 ? centroY : centroY - 70 + i * 140;
-      if (estilo === 'neon') {
-        ctx.shadowColor = color1; ctx.shadowBlur = 35; ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
-        ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.fillText(linea, 540, y); ctx.shadowBlur = 0;
-      } else if (estilo === 'bubble') {
-        ctx.lineWidth = 10; ctx.strokeStyle = color2; ctx.strokeText(linea, 540, y);
-        ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
-      } else if (estilo === 'tag') {
-        ctx.save(); ctx.translate(540, y); ctx.rotate(-0.06); ctx.fillStyle = color1; ctx.fillText(linea, 0, 0); ctx.restore();
-      } else {
-        ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(linea, 540, y);
-        ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
-      }
-    });
-    ctx.globalAlpha = 1;
-  }
-  const cfg = FONDOS[fondo];
-  const img = new Image(); img.src = cfg.src;
-  img.onload = () => {
-    const sw = img.width, sh = img.height * cfg.cropH, sy = img.height * cfg.cropTop;
-    ctx.drawImage(img, 0, sy, sw, sh, 0, 0, 1080, 1080);
-    dibujarTexto();
-  };
-}
-['texto','estilo','fondo','color1','color2'].forEach(id => {
-  document.getElementById(id).addEventListener('input', dibujar);
-  document.getElementById(id).addEventListener('change', dibujar);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const fileInput = document.getElementById('file');
+const preview = document.getElementById('preview');
+fileInput.addEventListener('change', ()=>{
+  const f = fileInput.files[0];
+  if(f){ preview.src = URL.createObjectURL(f); preview.style.display='block'; }
 });
-document.fonts.ready.then(() => dibujar()); dibujar();
-document.getElementById('btnDescargar').onclick = () => {
-  const texto = document.getElementById('texto').value.trim() || 'graffiti';
-  const link = document.createElement('a');
-  link.download = `b4w-${texto.toLowerCase().replace(/[^a-z0-9]+/g,'-')}.jpg`;
-  link.href = canvas.toDataURL('image/jpeg', 0.92);
-  link.click();
-  document.getElementById('msg').textContent = '¡Imagen descargada!';
-};
-document.getElementById('btnCompartir').onclick = async () => {
-  const texto = document.getElementById('texto').value.trim() || 'B4W';
-  canvas.toBlob(async (blob) => {
-    const file = new File([blob], 'b4w-graffiti.jpg', { type: 'image/jpeg' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: 'B4W WALL', text: `Mirá mi graffiti "${texto}" en B4W WALL` }); return; }
-      catch(e) {}
-    }
-    const link = document.createElement('a');
-    link.download = 'b4w-graffiti.jpg'; link.href = URL.createObjectURL(blob); link.click();
-    document.getElementById('msg').textContent = 'Te la descargué, mandala desde WhatsApp como foto.';
-  }, 'image/jpeg', 0.92);
-};
-document.getElementById('btnPublicar').onclick = async () => {
-  const btn = document.getElementById('btnPublicar');
-  const texto = document.getElementById('texto').value.trim();
-  const alias = document.getElementById('alias').value.trim() || 'Anónimo';
-  const estilo = document.getElementById('estilo').value;
-  const fondo = document.getElementById('fondo').value;
-  const color1 = document.getElementById('color1').value;
-  const color2 = document.getElementById('color2').value;
+
+document.getElementById('btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btn');
   const msg = document.getElementById('msg');
-  // SEGURIDAD: validaciones antes de enviar
-  if (!texto || texto.length > 30) { alert('El texto tiene que tener entre 1 y 30 letras'); return; }
-  if (!esTextoValido(texto) || !esTextoValido(alias)) { alert('Esa palabra no va en la pared'); return; }
-  if (!FUENTES[estilo] || !FONDOS[fondo]) { alert('Estilo o fondo no válido'); return; }
-  if (!/^#[0-9a-fA-F]{6}$/.test(color1) || !/^#[0-9a-fA-F]{6}$/.test(color2)) { alert('Color no válido'); return; }
-  // SEGURIDAD: anti-spam 30 segundos
-  const ultimo = localStorage.getItem('b4w_ultimo');
-  if (ultimo && Date.now() - parseInt(ultimo) < 30000) { alert('Tranqui, esperá 30 segundos para pintar otro'); return; }
-  btn.disabled = true; btn.textContent = 'Pintando...';
-  try {
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { data, error } = await client.from('graffitis').insert([{
-      texto, estilo, fondo, color1, color2, autor_alias: alias
-    }]).select().single();
-    if (error) throw error;
-    localStorage.setItem('b4w_ultimo', Date.now().toString());
-    window.location.href = `graffiti.html?id=${data.id}`;
-  } catch(e) { msg.textContent = 'Error: ' + e.message; btn.disabled = false; btn.textContent = 'PINTAR Y PUBLICAR'; }
-};
+  const title = document.getElementById('title').value.trim();
+  const author = document.getElementById('author').value.trim() || 'Anónimo';
+  const desc = document.getElementById('desc').value.trim();
+  const file = fileInput.files[0];
+
+  if(!title){ msg.textContent='Poné un título.'; return; }
+  if(!file){ msg.textContent='Elegí una foto.'; return; }
+  if(file.size > 5*1024*1024){ msg.textContent='La foto es muy pesada (máx 5MB).'; return; }
+
+  // Anti-spam 30 segundos
+  const last = localStorage.getItem('b4w_last');
+  if(last && Date.now() - Number(last) < 30000){ msg.textContent='Esperá 30 segundos entre publicaciones.'; return; }
+
+  btn.disabled=true;
+  msg.textContent='Subiendo...';
+
+  try{
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4) || 'jpg';
+    const fileName = Date.now() + '-' + Math.random().toString(36).slice(2,8) + '.' + ext;
+    const { error: upError } = await supabaseClient.storage.from('graffitis').upload(fileName, file);
+    if(upError) throw upError;
+    const { data: pub } = supabaseClient.storage.from('graffitis').getPublicUrl(fileName);
+    const { error: dbError } = await supabaseClient.from('graffitis').insert([{ title, author, description: desc, image_url: pub.publicUrl }]);
+    if(dbError) throw dbError;
+    localStorage.setItem('b4w_last', String(Date.now()));
+    msg.textContent='¡Publicado! Redirigiendo...';
+    setTimeout(()=> window.location.href='index.html', 1000);
+  }catch(e){
+    console.error(e);
+    msg.textContent='Error: ' + (e.message || 'intentá de nuevo');
+    btn.disabled=false;
+  }
+});
 </script>
 </body>
 </html>

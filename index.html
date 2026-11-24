@@ -3,78 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[B4W] WALL - La pared es de todos</title>
-<link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
+<title>B4W - La Pared</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  .filtros{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:25px 0}
-  .filtros button{background:#222;color:#fff;border:1px solid #444;padding:8px 16px;border-radius:20px;cursor:pointer}
-  .filtros button.activo{background:#ff2a4d;border-color:#ff2a4d}
-  #pared{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding:0 20px 40px;max-width:1100px;margin:0 auto}
-  .card{border-radius:14px;padding:30px 15px;min-height:180px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-decoration:none;color:inherit;cursor:pointer;background-size:cover;background-position:center top;position:relative;overflow:hidden}
-  .card-texto{font-size:30px;line-height:1.1;word-break:break-word;text-align:center;position:relative;z-index:1;opacity:.95;text-shadow:1px 1px 0 rgba(0,0,0,.3)}
-  .card-autor{margin-top:12px;font-size:13px;position:relative;z-index:1;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:10px;color:#fff}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+  header{padding:24px 20px;display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:2px}
+  .logo span{color:#ff2d55}
+  .btn-crear{background:#ff2d55;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:800;font-size:14px}
+  .hero{text-align:center;padding:20px 20px 30px}
+  .hero h1{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:0.9;letter-spacing:1px}
+  .hero h1 span{color:#ff2d55}
+  .hero p{opacity:0.7;margin-top:10px}
+  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;padding:20px}
+  .card{background:#1a1a1a;border-radius:16px;overflow:hidden;text-decoration:none;color:#fff;display:block}
+  .card img{width:100%;height:220px;object-fit:cover;display:block;background:#222}
+  .card-body{padding:14px 16px}
+  .card-body h3{font-size:16px;margin-bottom:4px;word-break:break-word}
+  .card-body p{font-size:13px;opacity:0.6;word-break:break-word}
+  #loading{text-align:center;padding:40px;opacity:0.6}
+  #empty{text-align:center;padding:40px;opacity:0.6;display:none}
+  #empty a{color:#ff2d55}
 </style>
 </head>
 <body>
-<header><h1>[B4W] <span>WALL</span></h1><p>La pared es de todos. Pintá algo, que quede en la historia.</p><a href="crear.html" class="btn-principal">+ PINTAR MI GRAFFITI</a></header>
-<div class="filtros"><button data-f="todos" class="activo">Todos</button><button data-f="stencil">Stencil</button><button data-f="bubble">Bubble</button><button data-f="wildstyle">Wildstyle</button><button data-f="neon">Neón</button><button data-f="tag">Tag</button></div>
-<div id="loading" style="text-align:center;padding:20px">Cargando pared...</div>
-<div id="pared"></div>
-<div id="vacio" style="display:none;text-align:center;padding:40px">Todavía no hay graffitis. ¡Sé el primero!</div>
+<header>
+  <div class="logo">B4W<span>.</span></div>
+  <a class="btn-crear" href="crear.html">+ Crear graffiti</a>
+</header>
+<div class="hero">
+  <h1>LA PARED<br><span>ES TUYA</span></h1>
+  <p>Subí tu graffiti. Que lo vea todo el barrio.</p>
+</div>
+<div id="loading">Cargando pared...</div>
+<div id="empty">Todavía no hay graffitis. <a href="crear.html">Sé el primero</a></div>
+<div id="grid"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
-const FONDOS = { ladrillo:'ladrillo.jpg', hormigon:'hormigon.jpg', negro:'negro.jpg', chapa:'chapa.jpg' };
-let todos = []; let filtroActual = 'todos';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// SEGURIDAD: lista blanca de valores permitidos, si viene algo raro de la DB se descarta
-function esSeguro(g){
-  if(!g || typeof g.texto !== 'string' || typeof g.autor_alias !== 'string') return false;
-  if(!FUENTES[g.estilo] || !FONDOS[g.fondo]) return false;
-  if(!/^#[0-9a-fA-F]{6}$/.test(g.color1)) return false;
-  if(!/^#[0-9a-fA-F]{6}$/.test(g.color2)) return false;
-  if(g.texto.length > 30 || g.autor_alias.length > 20) return false;
-  return true;
+async function cargar(){
+  const grid = document.getElementById('grid');
+  const loading = document.getElementById('loading');
+  const empty = document.getElementById('empty');
+  try{
+    const { data, error } = await supabaseClient.from('graffitis').select('*').order('created_at',{ascending:false});
+    loading.style.display='none';
+    if(error) throw error;
+    if(!data || data.length===0){ empty.style.display='block'; return; }
+    grid.innerHTML='';
+    data.forEach(g=>{
+      // Validación CORRECTA para UUID de Supabase
+      if(!/^[0-9a-fA-F-]{36}$/.test(String(g.id))) return;
+      const a = document.createElement('a');
+      a.className='card';
+      a.href='graffiti.html?id='+encodeURIComponent(g.id);
+      const img = document.createElement('img');
+      img.src=g.image_url || '';
+      img.alt='';
+      img.loading='lazy';
+      const body = document.createElement('div');
+      body.className='card-body';
+      const h3 = document.createElement('h3');
+      h3.textContent = g.title || 'Sin título';
+      const p = document.createElement('p');
+      p.textContent = (g.author || 'Anónimo') + ' • ' + new Date(g.created_at).toLocaleDateString('es-AR');
+      body.appendChild(h3);
+      body.appendChild(p);
+      a.appendChild(img);
+      a.appendChild(body);
+      grid.appendChild(a);
+    });
+  }catch(e){
+    loading.textContent='Error cargando pared. Recargá la página.';
+    console.error(e);
+  }
 }
-async function cargarPared(){
-  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const { data, error } = await client.from('graffitis').select('*').order('created_at', { ascending:false }).limit(100);
-  document.getElementById('loading').style.display='none';
-  if (error || !data) { document.getElementById('vacio').style.display='block'; return; }
-  todos = data.filter(esSeguro);
-  dibujar();
-}
-function dibujar(){
-  const pared = document.getElementById('pared'); pared.innerHTML = '';
-  const lista = todos.filter(g => filtroActual === 'todos' || g.estilo === filtroActual);
-  if (lista.length === 0) { document.getElementById('vacio').style.display='block'; return; }
-  document.getElementById('vacio').style.display='none';
-  lista.forEach(g => {
-    const a = document.createElement('a');
-    a.className = 'card';
-    // SEGURIDAD: id numérico solamente, si no es número no se arma link
-    if(!/^[0-9]+$/.test(String(g.id))) return;
-    a.href = `graffiti.html?id=${g.id}`;
-    a.style.backgroundImage = `url(${FONDOS[g.fondo]})`;
-    a.style.color = g.color1;
-    // SEGURIDAD: textContent, NUNCA innerHTML con datos del usuario
-    const txt = document.createElement('div');
-    txt.className = 'card-texto';
-    txt.style.fontFamily = `'${FUENTES[g.estilo]}', sans-serif`;
-    txt.style.mixBlendMode = g.fondo === 'negro' ? 'normal' : 'multiply';
-    txt.textContent = g.texto;
-    const autor = document.createElement('div');
-    autor.className = 'card-autor';
-    autor.textContent = `por ${g.autor_alias} • ${g.estilo}`;
-    a.appendChild(txt); a.appendChild(autor);
-    pared.appendChild(a);
-  });
-}
-document.querySelectorAll('.filtros button').forEach(b => { b.onclick = () => { document.querySelectorAll('.filtros button').forEach(x => x.classList.remove('activo')); b.classList.add('activo'); filtroActual = b.dataset.f; dibujar(); }; });
-cargarPared();
+cargar();
 </script>
 </body>
 </html>
