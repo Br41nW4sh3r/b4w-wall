@@ -14,6 +14,10 @@
   .colores input{height:50px;padding:5px;cursor:pointer}
   #preview{width:100%;max-width:600px;border-radius:16px;margin-top:20px;display:block}
   #btnPublicar{width:100%;padding:16px;margin-top:20px;background:#ff2a4d;color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer}
+  .share-row{display:flex;gap:10px;margin-top:12px}
+  .share-row button{flex:1;padding:14px;border-radius:12px;border:none;font-weight:bold;cursor:pointer;font-size:15px}
+  #btnDescargar{background:#222;color:#fff}
+  #btnCompartir{background:#25D366;color:#000}
 </style>
 </head>
 <body>
@@ -42,8 +46,13 @@
   <label>Tu alias</label>
   <input id="alias" placeholder="Ej: marcelo" value="marcelo">
   <canvas id="preview" width="1080" height="1080"></canvas>
+  <div class="share-row">
+    <button id="btnDescargar">⬇ Descargar imagen</button>
+    <button id="btnCompartir">📲 Compartir foto</button>
+  </div>
   <button id="btnPublicar">PINTAR Y PUBLICAR</button>
   <p id="msg" style="text-align:center"></p>
+  <p style="text-align:center;font-size:13px;color:#888">Tip: Descargar te baja la foto. Compartir abre WhatsApp / Instagram directo en el celu.</p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -52,15 +61,12 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const canvas = document.getElementById('preview');
 const ctx = canvas.getContext('2d');
 const FUENTES = { stencil:"'Black Ops One', sans-serif", bubble:"'Titan One', sans-serif", wildstyle:"'Black Ops One', sans-serif", neon:"'Monoton', sans-serif", tag:"'Permanent Marker', cursive" };
-
-// TUS FOTOS - tienen que estar en la misma carpeta
 const FONDOS = {
-  ladrillo: { src:'ladrillo.jpg', cropTop:0, cropH:0.72 }, // recorta pasto y piedra de abajo, solo ladrillo
-  hormigon: { src:'hormigon.jpg', cropTop:0, cropH:0.88 }, // recorta pisito de abajo
+  ladrillo: { src:'ladrillo.jpg', cropTop:0, cropH:0.72 },
+  hormigon: { src:'hormigon.jpg', cropTop:0, cropH:0.88 },
   negro: { src:'negro.jpg', cropTop:0, cropH:1 },
   chapa: { src:'chapa.jpg', cropTop:0, cropH:1 }
 };
-
 function dibujar() {
   const texto = document.getElementById('texto').value || 'B4W';
   const estilo = document.getElementById('estilo').value;
@@ -99,13 +105,39 @@ function dibujar() {
     ctx.drawImage(img, 0, sy, sw, sh, 0, 0, 1080, 1080);
     dibujarTexto();
   };
-  img.onerror = () => { ctx.fillStyle = '#333'; ctx.fillRect(0,0,1080,1080); ctx.fillStyle='#fff'; ctx.font='30px sans-serif'; ctx.textAlign='center'; ctx.fillText('Falta el archivo '+cfg.src, 540, 540); };
 }
 ['texto','estilo','fondo','color1','color2'].forEach(id => {
   document.getElementById(id).addEventListener('input', dibujar);
   document.getElementById(id).addEventListener('change', dibujar);
 });
 document.fonts.ready.then(() => dibujar()); dibujar();
+
+// DESCARGAR COMO FOTO
+document.getElementById('btnDescargar').onclick = () => {
+  const texto = document.getElementById('texto').value.trim() || 'graffiti';
+  const link = document.createElement('a');
+  link.download = `b4w-${texto.toLowerCase().replace(/[^a-z0-9]+/g,'-')}.jpg`;
+  link.href = canvas.toDataURL('image/jpeg', 0.92);
+  link.click();
+  document.getElementById('msg').textContent = '¡Imagen descargada! Ya la podés mandar por WhatsApp.';
+};
+
+// COMPARTIR COMO FOTO (celu)
+document.getElementById('btnCompartir').onclick = async () => {
+  const texto = document.getElementById('texto').value.trim() || 'B4W';
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], 'b4w-graffiti.jpg', { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'B4W WALL', text: `Mirá mi graffiti "${texto}" en B4W WALL` }); return; }
+      catch(e) {}
+    }
+    // Si el navegador no deja compartir foto, descarga y avisa
+    const link = document.createElement('a');
+    link.download = 'b4w-graffiti.jpg'; link.href = URL.createObjectURL(blob); link.click();
+    document.getElementById('msg').textContent = 'Tu celu no deja compartir directo. Te la descargué, mandala desde WhatsApp como foto.';
+  }, 'image/jpeg', 0.92);
+};
+
 document.getElementById('btnPublicar').onclick = async () => {
   const btn = document.getElementById('btnPublicar');
   const texto = document.getElementById('texto').value.trim();
