@@ -3,8 +3,8 @@ console.log("app.js cargado");
 
 let supabase = null;
 try {
-  const SUPABASE_URL = "TU_SUPABASE_URL"; // <-- pegá acá tu URL real
-  const SUPABASE_KEY = "TU_ANON_KEY"; // <-- pegá acá tu anon key real
+  const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co"; // <-- pegá acá tu URL real
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic"; // <-- pegá acá tu anon key real
   if (SUPABASE_URL.startsWith("http") && window.supabase) {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     console.log("Supabase OK");
