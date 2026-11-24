@@ -32,7 +32,7 @@
 <div class="box">
   <h1>CREÁ TU GRAFFITI</h1>
   <label>Título *</label>
-  <input id="title" maxlength="80" placeholder="Ej: Mi primer tag">
+  <input id="title" maxlength="80" placeholder="Ej: Hormigon">
   <label>Autor / Apodo</label>
   <input id="author" maxlength="40" placeholder="Ej: B4W">
   <label>Descripción</label>
@@ -43,20 +43,17 @@
   <button id="btn">PUBLICAR EN LA PARED →</button>
   <div id="msg"></div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const fileInput = document.getElementById('file');
 const preview = document.getElementById('preview');
 fileInput.addEventListener('change', ()=>{
   const f = fileInput.files[0];
   if(f){ preview.src = URL.createObjectURL(f); preview.style.display='block'; }
 });
-
 document.getElementById('btn').addEventListener('click', async ()=>{
   const btn = document.getElementById('btn');
   const msg = document.getElementById('msg');
@@ -64,34 +61,25 @@ document.getElementById('btn').addEventListener('click', async ()=>{
   const author = document.getElementById('author').value.trim() || 'Anónimo';
   const desc = document.getElementById('desc').value.trim();
   const file = fileInput.files[0];
-
   if(!title){ msg.textContent='Poné un título.'; return; }
   if(!file){ msg.textContent='Elegí una foto.'; return; }
   if(file.size > 5*1024*1024){ msg.textContent='La foto es muy pesada (máx 5MB).'; return; }
-
-  // Anti-spam 30 segundos
   const last = localStorage.getItem('b4w_last');
   if(last && Date.now() - Number(last) < 30000){ msg.textContent='Esperá 30 segundos entre publicaciones.'; return; }
-
-  btn.disabled=true;
-  msg.textContent='Subiendo...';
-
+  btn.disabled=true; msg.textContent='Subiendo...';
   try{
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,4) || 'jpg';
     const fileName = Date.now() + '-' + Math.random().toString(36).slice(2,8) + '.' + ext;
     const { error: upError } = await supabaseClient.storage.from('graffitis').upload(fileName, file);
     if(upError) throw upError;
     const { data: pub } = supabaseClient.storage.from('graffitis').getPublicUrl(fileName);
-    const { error: dbError } = await supabaseClient.from('graffitis').insert([{ title, author, description: desc, image_url: pub.publicUrl }]);
+    // Guardamos en AMBAS columnas para que ande con tu tabla vieja y la nueva
+    const { error: dbError } = await supabaseClient.from('graffitis').insert([{ title, texto: title, author, description: desc, image_url: pub.publicUrl, estilo: 'foto' }]);
     if(dbError) throw dbError;
     localStorage.setItem('b4w_last', String(Date.now()));
     msg.textContent='¡Publicado! Redirigiendo...';
     setTimeout(()=> window.location.href='index.html', 1000);
-  }catch(e){
-    console.error(e);
-    msg.textContent='Error: ' + (e.message || 'intentá de nuevo');
-    btn.disabled=false;
-  }
+  }catch(e){ console.error(e); msg.textContent='Error: ' + (e.message || 'intentá de nuevo'); btn.disabled=false; }
 });
 </script>
 </body>

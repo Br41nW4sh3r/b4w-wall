@@ -19,6 +19,7 @@
   #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;padding:20px}
   .card{background:#1a1a1a;border-radius:16px;overflow:hidden;text-decoration:none;color:#fff;display:block}
   .card img{width:100%;height:220px;object-fit:cover;display:block;background:#222}
+  .card-text{width:100%;height:220px;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1}
   .card-body{padding:14px 16px}
   .card-body h3{font-size:16px;margin-bottom:4px;word-break:break-word}
   .card-body p{font-size:13px;opacity:0.6;word-break:break-word}
@@ -39,13 +40,11 @@
 <div id="loading">Cargando pared...</div>
 <div id="empty">Todavía no hay graffitis. <a href="crear.html">Sé el primero</a></div>
 <div id="grid"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 async function cargar(){
   const grid = document.getElementById('grid');
   const loading = document.getElementById('loading');
@@ -57,31 +56,34 @@ async function cargar(){
     if(!data || data.length===0){ empty.style.display='block'; return; }
     grid.innerHTML='';
     data.forEach(g=>{
-      // Validación CORRECTA para UUID de Supabase
       if(!/^[0-9a-fA-F-]{36}$/.test(String(g.id))) return;
+      const titulo = g.title || g.texto || 'Sin título';
       const a = document.createElement('a');
       a.className='card';
       a.href='graffiti.html?id='+encodeURIComponent(g.id);
-      const img = document.createElement('img');
-      img.src=g.image_url || '';
-      img.alt='';
-      img.loading='lazy';
+      if(g.image_url){
+        const img = document.createElement('img');
+        img.src=g.image_url; img.alt=''; img.loading='lazy';
+        a.appendChild(img);
+      } else {
+        const div = document.createElement('div');
+        div.className='card-text';
+        div.style.background = g.color1 || '#1a1a1a';
+        div.textContent = titulo;
+        a.appendChild(div);
+      }
       const body = document.createElement('div');
       body.className='card-body';
       const h3 = document.createElement('h3');
-      h3.textContent = g.title || 'Sin título';
+      h3.textContent = titulo;
       const p = document.createElement('p');
-      p.textContent = (g.author || 'Anónimo') + ' • ' + new Date(g.created_at).toLocaleDateString('es-AR');
-      body.appendChild(h3);
-      body.appendChild(p);
-      a.appendChild(img);
+      const fecha = g.created_at ? new Date(g.created_at).toLocaleDateString('es-AR') : '';
+      p.textContent = (g.author || 'Anónimo') + (fecha ? ' • ' + fecha : '');
+      body.appendChild(h3); body.appendChild(p);
       a.appendChild(body);
       grid.appendChild(a);
     });
-  }catch(e){
-    loading.textContent='Error cargando pared. Recargá la página.';
-    console.error(e);
-  }
+  }catch(e){ loading.textContent='Error cargando pared. Recargá.'; console.error(e); }
 }
 cargar();
 </script>

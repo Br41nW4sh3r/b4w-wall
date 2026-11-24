@@ -14,6 +14,7 @@
   .back{color:#fff;opacity:0.7;text-decoration:none;font-size:14px}
   .box{max-width:800px;margin:0 auto;padding:0 20px 40px}
   #foto{width:100%;border-radius:16px;max-height:520px;object-fit:cover;background:#222;display:none}
+  #textoGrande{width:100%;border-radius:16px;padding:60px 20px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;display:none}
   h1{font-family:'Bebas Neue',sans-serif;font-size:48px;margin:18px 0 6px;word-break:break-word}
   #autor{opacity:0.6;margin-bottom:14px}
   #desc{line-height:1.6;opacity:0.85;white-space:pre-wrap;word-break:break-word}
@@ -33,6 +34,7 @@
   <div id="loading">Cargando graffiti...</div>
   <div id="content" style="display:none">
     <img id="foto" alt="">
+    <div id="textoGrande"></div>
     <h1 id="titulo"></h1>
     <p id="autor"></p>
     <p id="desc"></p>
@@ -42,17 +44,14 @@
     </div>
   </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 async function cargar(){
   const params = new URLSearchParams(window.location.search);
   const idRaw = params.get('id') || '';
-  // ARREGLO CLAVE: acepta UUID como cdd3b843-728a-4369-9c89-0bb8b147ea3f
   const id = /^[0-9a-fA-F-]{36}$/.test(idRaw) ? idRaw : null;
   const loading = document.getElementById('loading');
   if(!id){ loading.textContent='Este graffiti no existe.'; return; }
@@ -61,17 +60,21 @@ async function cargar(){
     if(error || !data){ loading.textContent='Este graffiti no existe.'; return; }
     loading.style.display='none';
     document.getElementById('content').style.display='block';
-    const foto = document.getElementById('foto');
-    foto.src = data.image_url || '';
-    foto.style.display='block';
-    document.getElementById('titulo').textContent = data.title || 'Sin título';
-    document.getElementById('autor').textContent = (data.author || 'Anónimo') + ' • ' + new Date(data.created_at).toLocaleDateString('es-AR');
+    const titulo = data.title || data.texto || 'Sin título';
+    if(data.image_url){
+      const foto = document.getElementById('foto');
+      foto.src = data.image_url; foto.style.display='block';
+    } else {
+      const tg = document.getElementById('textoGrande');
+      tg.textContent = titulo;
+      tg.style.background = data.color1 || '#1a1a1a';
+      tg.style.display='block';
+    }
+    document.getElementById('titulo').textContent = titulo;
+    document.getElementById('autor').textContent = (data.author || 'Anónimo') + ' • ' + (data.created_at ? new Date(data.created_at).toLocaleDateString('es-AR') : '');
     document.getElementById('desc').textContent = data.description || '';
     document.getElementById('btnWa').href = 'https://wa.me/?text=' + encodeURIComponent('Mirá este graffiti en B4W: ' + window.location.href);
-  }catch(e){
-    console.error(e);
-    loading.textContent='Error cargando graffiti.';
-  }
+  }catch(e){ console.error(e); loading.textContent='Error cargando graffiti.'; }
 }
 cargar();
 </script>
