@@ -14,18 +14,14 @@
   .colores input{height:50px;padding:5px;cursor:pointer}
   #preview{width:100%;max-width:600px;border-radius:16px;margin-top:20px;display:block}
   #btnPublicar{width:100%;padding:16px;margin-top:20px;background:#ff2a4d;color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer}
-  #btnPublicar:disabled{opacity:.6}
 </style>
 </head>
 <body>
 <header><a href="index.html">← Volver a la pared</a><h1>[B4W] <span>WALL</span></h1></header>
-
 <main class="crear-wrap">
   <h2>Pintá tu graffiti</h2>
-
   <label>Tu texto</label>
   <input id="texto" placeholder="Ej: VAMO LOS REDO!!!" maxlength="30" value="VAMO LOS REDO!!!">
-
   <label>Estilo</label>
   <select id="estilo">
     <option value="stencil">Stencil</option>
@@ -34,54 +30,35 @@
     <option value="neon" selected>Neón</option>
     <option value="tag">Tag</option>
   </select>
-
-  <label>Fondo - pared real</label>
+  <label>Fondo - tus paredes</label>
   <select id="fondo">
-    <option value="ladrillo" selected>Ladrillo real</option>
+    <option value="ladrillo" selected>Ladrillo rojo</option>
     <option value="hormigon">Hormigón</option>
-    <option value="negro">Pared negra</option>
+    <option value="negro">Negro</option>
     <option value="chapa">Chapa</option>
   </select>
-
   <label>Colores</label>
-  <div class="colores">
-    <input type="color" id="color1" value="#ff2a4d">
-    <input type="color" id="color2" value="#ffffff">
-  </div>
-
+  <div class="colores"><input type="color" id="color1" value="#ff2a4d"><input type="color" id="color2" value="#ffffff"></div>
   <label>Tu alias</label>
   <input id="alias" placeholder="Ej: marcelo" value="marcelo">
-
   <canvas id="preview" width="1080" height="1080"></canvas>
-
   <button id="btnPublicar">PINTAR Y PUBLICAR</button>
   <p id="msg" style="text-align:center"></p>
 </main>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// --- PEGA ACA TUS KEYS REALES ---
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
-
-
 const canvas = document.getElementById('preview');
 const ctx = canvas.getContext('2d');
+const FUENTES = { stencil:"'Black Ops One', sans-serif", bubble:"'Titan One', sans-serif", wildstyle:"'Black Ops One', sans-serif", neon:"'Monoton', sans-serif", tag:"'Permanent Marker', cursive" };
 
-const FUENTES = {
-  stencil: "'Black Ops One', sans-serif",
-  bubble: "'Titan One', sans-serif",
-  wildstyle: "'Black Ops One', sans-serif",
-  neon: "'Monoton', sans-serif",
-  tag: "'Permanent Marker', cursive"
-};
-
-// FOTOS REALES DE PARED
-const FONDOS_IMG = {
-  ladrillo: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1080&q=80',
-  hormigon: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1080&q=80',
-  negro: 'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=1080&q=80',
-  chapa: 'https://images.unsplash.com/photo-1535732820275-9ffd998cac22?w=1080&q=80'
+// TUS FOTOS - tienen que estar en la misma carpeta
+const FONDOS = {
+  ladrillo: { src:'ladrillo.jpg', cropTop:0, cropH:0.72 }, // recorta pasto y piedra de abajo, solo ladrillo
+  hormigon: { src:'hormigon.jpg', cropTop:0, cropH:0.88 }, // recorta pisito de abajo
+  negro: { src:'negro.jpg', cropTop:0, cropH:1 },
+  chapa: { src:'chapa.jpg', cropTop:0, cropH:1 }
 };
 
 function dibujar() {
@@ -90,125 +67,62 @@ function dibujar() {
   const fondo = document.getElementById('fondo').value;
   const color1 = document.getElementById('color1').value;
   const color2 = document.getElementById('color2').value;
-
   function dibujarTexto() {
-    // Líneas decorativas
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    ctx.lineWidth = 2;
-    for (let y = 0; y < 1080; y += 90) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(1080, y);
-      ctx.stroke();
-    }
-
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Ajustar tamaño según largo del texto
-    let size = 140;
-    if (texto.length > 10) size = 110;
-    if (texto.length > 18) size = 85;
-    if (texto.length > 25) size = 65;
-
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    let lineas = [texto]; let size = 130;
+    if (texto.length > 12) { size = 95; lineas = [texto.slice(0, Math.ceil(texto.length/2)), texto.slice(Math.ceil(texto.length/2))]; }
+    if (texto.length > 20) size = 75;
     ctx.font = `${size}px ${FUENTES[estilo]}`;
-
-    if (estilo === 'neon') {
-      ctx.shadowColor = color1;
-      ctx.shadowBlur = 40;
-      ctx.fillStyle = color1;
-      ctx.fillText(texto, 540, 540);
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = '#fff';
-      ctx.fillText(texto, 540, 540);
-      ctx.shadowBlur = 0;
-    } else if (estilo === 'bubble') {
-      ctx.lineWidth = 12;
-      ctx.strokeStyle = color2;
-      ctx.strokeText(texto, 540, 540);
-      ctx.fillStyle = color1;
-      ctx.fillText(texto, 540, 540);
-    } else if (estilo === 'tag') {
-      ctx.fillStyle = color1;
-      ctx.save();
-      ctx.translate(540, 540);
-      ctx.rotate(-0.08);
-      ctx.fillText(texto, 0, 0);
-      ctx.restore();
-    } else {
-      // stencil / wildstyle
-      ctx.lineWidth = 8;
-      ctx.strokeStyle = '#000';
-      ctx.strokeText(texto, 540, 540);
-      ctx.fillStyle = color1;
-      ctx.fillText(texto, 540, 540);
-      // sombra 3D
-      ctx.fillStyle = color2;
-      ctx.globalAlpha = 0.35;
-      ctx.fillText(texto, 548, 548);
-      ctx.globalAlpha = 1;
-    }
+    ctx.globalAlpha = 0.94;
+    const centroY = 540;
+    lineas.forEach((linea, i) => {
+      const y = lineas.length === 1 ? centroY : centroY - 70 + i * 140;
+      if (estilo === 'neon') {
+        ctx.shadowColor = color1; ctx.shadowBlur = 35; ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
+        ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.fillText(linea, 540, y); ctx.shadowBlur = 0;
+      } else if (estilo === 'bubble') {
+        ctx.lineWidth = 10; ctx.strokeStyle = color2; ctx.strokeText(linea, 540, y);
+        ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
+      } else if (estilo === 'tag') {
+        ctx.save(); ctx.translate(540, y); ctx.rotate(-0.06); ctx.fillStyle = color1; ctx.fillText(linea, 0, 0); ctx.restore();
+      } else {
+        ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(linea, 540, y);
+        ctx.fillStyle = color1; ctx.fillText(linea, 540, y);
+      }
+    });
+    ctx.globalAlpha = 1;
   }
-
-  // Cargar foto de fondo
-  const imgFondo = new Image();
-  imgFondo.crossOrigin = 'anonymous';
-  imgFondo.src = FONDOS_IMG[fondo] || FONDOS_IMG.ladrillo;
-  imgFondo.onload = () => {
-    ctx.drawImage(imgFondo, 0, 0, 1080, 1080);
-    // oscurecer un poquito para que se lea el texto
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.fillRect(0, 0, 1080, 1080);
+  const cfg = FONDOS[fondo];
+  const img = new Image(); img.src = cfg.src;
+  img.onload = () => {
+    const sw = img.width, sh = img.height * cfg.cropH, sy = img.height * cfg.cropTop;
+    ctx.drawImage(img, 0, sy, sw, sh, 0, 0, 1080, 1080);
     dibujarTexto();
   };
-  imgFondo.onerror = () => {
-    // si falla la foto, fondo plano de respaldo
-    ctx.fillStyle = '#7a3b2e';
-    ctx.fillRect(0, 0, 1080, 1080);
-    dibujarTexto();
-  };
+  img.onerror = () => { ctx.fillStyle = '#333'; ctx.fillRect(0,0,1080,1080); ctx.fillStyle='#fff'; ctx.font='30px sans-serif'; ctx.textAlign='center'; ctx.fillText('Falta el archivo '+cfg.src, 540, 540); };
 }
-
-// Escuchar cambios
 ['texto','estilo','fondo','color1','color2'].forEach(id => {
   document.getElementById(id).addEventListener('input', dibujar);
   document.getElementById(id).addEventListener('change', dibujar);
 });
-
-// Dibujar al cargar (esperar fuentes)
-document.fonts.ready.then(() => dibujar());
-dibujar();
-
-// Publicar
+document.fonts.ready.then(() => dibujar()); dibujar();
 document.getElementById('btnPublicar').onclick = async () => {
   const btn = document.getElementById('btnPublicar');
-  const msg = document.getElementById('msg');
   const texto = document.getElementById('texto').value.trim();
   if (!texto) { alert('Escribí algo'); return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Pintando...';
-  msg.textContent = '';
-
+  btn.disabled = true; btn.textContent = 'Pintando...';
   try {
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data, error } = await client.from('graffitis').insert([{
-      texto: texto,
-      estilo: document.getElementById('estilo').value,
+      texto, estilo: document.getElementById('estilo').value,
       fondo: document.getElementById('fondo').value,
       color1: document.getElementById('color1').value,
       color2: document.getElementById('color2').value,
       autor_alias: document.getElementById('alias').value.trim() || 'Anónimo'
     }]).select().single();
-
     if (error) throw error;
     window.location.href = `graffiti.html?id=${data.id}`;
-  } catch(e) {
-    console.error(e);
-    msg.textContent = 'Error al publicar: ' + e.message;
-    btn.disabled = false;
-    btn.textContent = 'PINTAR Y PUBLICAR';
-  }
+  } catch(e) { document.getElementById('msg').textContent = 'Error: ' + e.message; btn.disabled = false; btn.textContent = 'PINTAR Y PUBLICAR'; }
 };
 </script>
 </body>

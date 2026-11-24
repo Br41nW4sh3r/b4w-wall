@@ -8,9 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Titan+One&family=Permanent+Marker&family=Monoton&display=swap" rel="stylesheet">
 <style>
   .graffiti-detalle{max-width:600px;margin:0 auto;padding:20px;text-align:center}
-  .graffiti-cuadro{border-radius:16px;padding:40px 20px;min-height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center;background-size:cover;background-position:center;position:relative;overflow:hidden}
-  .graffiti-cuadro::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.25)}
-  .graffiti-texto{font-size:64px;line-height:1;word-break:break-word;position:relative;z-index:1;text-shadow:3px 3px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000}
+  .graffiti-cuadro{border-radius:16px;padding:40px 20px;min-height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center;background-size:cover;background-position:center top;overflow:hidden}
+  .graffiti-texto{font-size:56px;line-height:1.1;word-break:break-word;opacity:.95}
   .share-box{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
   .share-box a,.share-box button{background:#222;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;border:none;cursor:pointer}
   .share-box a.whatsapp{background:#25D366;color:#000;font-weight:bold}
@@ -21,37 +20,21 @@
 <main class="graffiti-detalle">
   <div id="loading">Cargando graffiti...</div>
   <div id="contenido" style="display:none">
-    <div id="cuadro" class="graffiti-cuadro"><div id="textoGraffiti" class="graffiti-texto"></div><div id="estiloGraffiti" style="margin-top:15px;position:relative;z-index:1;text-shadow:1px 1px 0 #000"></div></div>
+    <div id="cuadro" class="graffiti-cuadro"><div id="textoGraffiti" class="graffiti-texto"></div><div id="estiloGraffiti" style="margin-top:15px;background:rgba(0,0,0,.55);padding:4px 10px;border-radius:10px;color:#fff"></div></div>
     <h2 id="autor"></h2><p id="fecha"></p>
-    <div class="share-box">
-      <a id="btnWA" class="whatsapp" target="_blank">WhatsApp</a>
-      <a id="btnX" target="_blank">X</a>
-      <a id="btnFB" target="_blank">Facebook</a>
-      <button id="btnCopiar">Copiar Link</button>
-    </div><br><a href="crear.html" class="btn-principal">Pintar el mío también</a>
+    <div class="share-box"><a id="btnWA" class="whatsapp" target="_blank">WhatsApp</a><a id="btnX" target="_blank">X</a><a id="btnFB" target="_blank">Facebook</a><button id="btnCopiar">Copiar Link</button></div><br><a href="crear.html" class="btn-principal">Pintar el mío también</a>
   </div>
-  <div id="error" style="display:none"><p>Este graffiti no existe o no se pudo cargar.</p><a href="index.html" class="btn-principal">Ir a la pared</a></div>
+  <div id="error" style="display:none"><p>Este graffiti no existe.</p><a href="index.html" class="btn-principal">Ir a la pared</a></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const id = new URLSearchParams(location.search).get('id');
 if (!id) { document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; }
-
-// --- PEGA ACA TUS KEYS REALES, LAS MISMAS QUE EN crear.html ---
 const SUPABASE_URL = "https://ciwjyflatveowadenini.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpd2p5ZmxhdHZlb3dhZGVuaW5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MzE5ODAsImV4cCI6MjExMTEwNzk4MH0.wswRXCIhm5ZIMdtvncfssZO_y6wUigjgMmTMVYxA1ic";
 
-
 const FUENTES = { stencil:'Black Ops One', bubble:'Titan One', wildstyle:'Black Ops One', neon:'Monoton', tag:'Permanent Marker' };
-
-// MISMAS FOTOS QUE EN crear.html
-const FONDOS_IMG = {
-  ladrillo: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&q=80',
-  hormigon: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80',
-  negro: 'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=800&q=80',
-  chapa: 'https://images.unsplash.com/photo-1535732820275-9ffd998cac22?w=800&q=80'
-};
-
+const FONDOS = { ladrillo:'ladrillo.jpg', hormigon:'hormigon.jpg', negro:'negro.jpg', chapa:'chapa.jpg' };
 async function cargar(){
   try{
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -60,12 +43,12 @@ async function cargar(){
     document.getElementById('loading').style.display='none';
     document.getElementById('contenido').style.display='block';
     const cuadro = document.getElementById('cuadro');
-    cuadro.style.backgroundImage = `url(${FONDOS_IMG[data.fondo] || FONDOS_IMG.ladrillo})`;
+    cuadro.style.backgroundImage = `url(${FONDOS[data.fondo] || FONDOS.ladrillo})`;
     cuadro.style.color = data.color1;
-    if (data.estilo === 'neon') cuadro.style.textShadow = `0 0 20px ${data.color1}, 0 0 40px ${data.color1}`;
     const txt = document.getElementById('textoGraffiti');
     txt.textContent = data.texto;
     txt.style.fontFamily = `'${FUENTES[data.estilo]}', sans-serif`;
+    txt.style.mixBlendMode = data.fondo === 'negro' ? 'normal' : 'multiply';
     document.getElementById('estiloGraffiti').textContent = `Estilo: ${data.estilo} • ${data.fondo}`;
     document.getElementById('autor').textContent = `por ${data.autor_alias}`;
     document.getElementById('fecha').textContent = new Date(data.created_at).toLocaleString('es-AR');
@@ -75,10 +58,7 @@ async function cargar(){
     document.getElementById('btnX').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(mensaje)}`;
     document.getElementById('btnFB').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     document.getElementById('btnCopiar').onclick = () => { navigator.clipboard.writeText(url); alert('Link copiado'); };
-  } catch(e){
-    document.getElementById('loading').style.display='none';
-    document.getElementById('error').style.display='block';
-  }
+  } catch(e){ document.getElementById('loading').style.display='none'; document.getElementById('error').style.display='block'; }
 }
 if (id) cargar();
 </script>
