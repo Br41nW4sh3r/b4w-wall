@@ -83,7 +83,10 @@ async function cargarMuro(filtro='todos') {
   muro.innerHTML = (data||[]).map(g => `
     <div class="card">
       <div style="padding:20px; text-align:center; background:#222; font-family:'${FUENTES[g.estilo]}', sans-serif; font-size:32px; color:${g.color1}">${g.texto}</div>
-      <div class="card-info"><b>${g.autor_alias}</b> • ${g.estilo} • ${new Date(g.created_at).toLocaleDateString('es-AR')}
+      <div class="card-info">
+  <b>${g.autor_alias}</b> • ${g.estilo}<br>
+  <a href="graffiti.html?id=${g.id}" style="color:#ff2d55; font-weight:bold">Ver / Compartir →</a>
+</div>
       <br><a href="https://wa.me/?text=${encodeURIComponent('Mirá mi graffiti en B4W WALL: ' + location.origin)}" target="_blank">Compartir en WhatsApp</a></div>
     </div>`).join('') || '<p>Todavía no hay graffitis. ¡Sé el primero!</p>';
 }
@@ -101,7 +104,9 @@ document.getElementById('btnPintar')?.addEventListener('click', async () => {
     autor_alias: document.getElementById('alias').value || 'Anónimo'
   }]).select().single();
   if (error) return alert('Error: ' + error.message);
-  alert('¡Pintado! Ya está en la pared.');
+  //alert('¡Pintado! Ya está en la pared.');
+  // Reemplazá el alert('¡Pintado!...') por esto:
+window.location.href = `graffiti.html?id=${data.id}`;
   const url = location.origin + '/';
   document.getElementById('compartir').style.display = 'block';
   document.getElementById('linkWhatsapp').href = `https://wa.me/?text=${encodeURIComponent('Mirá mi graffiti: ' + texto + ' en B4W WALL ' + url)}`;
